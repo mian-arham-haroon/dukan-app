@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { SafeAreaView, ScrollView, StyleSheet, Text, View, Pressable } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
@@ -47,6 +47,7 @@ export function InvoicesScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const saveInvoiceLockRef = useRef(false);
 
   const selectedProduct = useMemo(() => products.find((p) => p.id === selectedProductId) ?? null, [products, selectedProductId]);
   const parsedQuantity = parseNumber(quantity);
@@ -98,38 +99,35 @@ export function InvoicesScreen({ navigation }: Props) {
   function handleRemoveCartLine(productId: string) { setCartLines((cur) => cur.filter((l) => l.productId !== productId)); }
 
   async function handleSaveInvoice() {
-    if (saving) {
+    if (saveInvoiceLockRef.current || saving) {
       return;
     }
 
+    saveInvoiceLockRef.current = true;
     setSaving(true);
     setError("");
 
-    if (cartLines.length === 0) {
-      setError("Add at least one product to the invoice.");
-      setSaving(false);
-      return;
-    }
-
-    if (paymentStatus === "partial" && paidAmount <= 0) {
-      setError("Partial paid amount must be greater than 0.");
-      setSaving(false);
-      return;
-    }
-
-    if (paidAmount > invoiceTotal) {
-      setError("Paid amount cannot be greater than invoice total.");
-      setSaving(false);
-      return;
-    }
-
-    if (balanceDue > 0 && !selectedCustomerId) {
-      setError("Select a customer for partial or unpaid invoice.");
-      setSaving(false);
-      return;
-    }
-
     try {
+      if (cartLines.length === 0) {
+        setError("Add at least one product to the invoice.");
+        return;
+      }
+
+      if (paymentStatus === "partial" && paidAmount <= 0) {
+        setError("Partial paid amount must be greater than 0.");
+        return;
+      }
+
+      if (paidAmount > invoiceTotal) {
+        setError("Paid amount cannot be greater than invoice total.");
+        return;
+      }
+
+      if (balanceDue > 0 && !selectedCustomerId) {
+        setError("Select a customer for partial or unpaid invoice.");
+        return;
+      }
+
       await createInvoice({
         customerId: selectedCustomerId,
         lines: cartLines.map((l) => ({ productId: l.productId, quantity: l.quantity })),
@@ -147,6 +145,7 @@ export function InvoicesScreen({ navigation }: Props) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
       setSaving(false);
+      saveInvoiceLockRef.current = false;
     }
   }
 

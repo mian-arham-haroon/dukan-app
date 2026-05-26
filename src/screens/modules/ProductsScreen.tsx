@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Platform,
@@ -57,6 +57,8 @@ export function ProductsScreen() {
   const [stockQuantity, setStockQuantity] = useState("");
 
   const [error, setError] = useState("");
+  const saveProductLockRef = useRef(false);
+  const deleteProductLockRef = useRef(false);
 
   const isEditing = editingProductId !== null;
 
@@ -134,12 +136,18 @@ export function ProductsScreen() {
   }
 
   async function handleSaveProduct() {
+    if (saveProductLockRef.current || saving || deleting) {
+      return;
+    }
+
+    saveProductLockRef.current = true;
     setError("");
 
     const productName = name.trim();
 
     if (!productName) {
       setError("Product name is required.");
+      saveProductLockRef.current = false;
       return;
     }
 
@@ -149,16 +157,19 @@ export function ProductsScreen() {
 
     if (parsedCostPrice < 0) {
       setError("Cost price must be a valid number.");
+      saveProductLockRef.current = false;
       return;
     }
 
     if (parsedSellingPrice < 0) {
       setError("Selling price must be a valid number.");
+      saveProductLockRef.current = false;
       return;
     }
 
     if (parsedStockQuantity < 0) {
       setError("Stock quantity must be a valid number.");
+      saveProductLockRef.current = false;
       return;
     }
 
@@ -189,12 +200,19 @@ export function ProductsScreen() {
       );
     } finally {
       setSaving(false);
+      saveProductLockRef.current = false;
     }
   }
 
   async function handleDeleteProduct(productId: string) {
+    if (deleteProductLockRef.current || deleting) {
+      return;
+    }
+
+    deleteProductLockRef.current = true;
     const confirmed = await confirmDeleteProduct();
     if (!confirmed) {
+      deleteProductLockRef.current = false;
       return;
     }
 
@@ -216,6 +234,7 @@ export function ProductsScreen() {
       );
     } finally {
       setDeleting(false);
+      deleteProductLockRef.current = false;
     }
   }
 
