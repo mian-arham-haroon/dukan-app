@@ -18,6 +18,7 @@ import {
 } from "../../database/returnsRepository";
 import type { RootStackParamList } from "../../navigation/RootNavigator";
 import type { InvoiceReturnPreview } from "../../types/return";
+import { useAppTheme } from "../../theme/useAppTheme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "InvoiceReturn">;
 
@@ -60,6 +61,7 @@ function confirmReturnAction(): Promise<boolean> {
 }
 
 export function InvoiceReturnScreen({ route, navigation }: Props) {
+  const { theme } = useAppTheme();
   const { invoiceId, localId } = route.params;
 
   const [preview, setPreview] = useState<InvoiceReturnPreview | null>(null);
@@ -188,10 +190,10 @@ export function InvoiceReturnScreen({ route, navigation }: Props) {
 
   if (!preview) {
     return (
-      <SafeAreaView style={styles.screen}>
+      <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
         <View style={styles.wrapper}>
           <AppCard>
-            <Text style={styles.errorText}>{error || "Invoice not found."}</Text>
+            <Text style={[styles.errorText, { color: theme.danger }]}>{error || "Invoice not found."}</Text>
           </AppCard>
         </View>
       </SafeAreaView>
@@ -199,7 +201,7 @@ export function InvoiceReturnScreen({ route, navigation }: Props) {
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.wrapper}>
           <AppCard style={styles.headerCard}>
@@ -212,28 +214,28 @@ export function InvoiceReturnScreen({ route, navigation }: Props) {
             />
           </AppCard>
 
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          {error ? <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text> : null}
           {successMessage ? (
-            <Text style={styles.successText}>{successMessage}</Text>
+            <Text style={[styles.successText, { color: theme.success }]}>{successMessage}</Text>
           ) : null}
 
           <AppCard style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>Return items</Text>
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Return items</Text>
 
             {preview.lines.map((line) => {
               const key = line.productId ?? line.productName;
 
               return (
-                <View key={key} style={styles.itemBox}>
-                  <Text style={styles.itemTitle}>{line.productName}</Text>
+                <View key={key} style={[styles.itemBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                  <Text style={[styles.itemTitle, { color: theme.textPrimary }]}>{line.productName}</Text>
 
-                  <Text style={styles.mutedText}>
+                  <Text style={[styles.mutedText, { color: theme.textSecondary }]}>
                     Sold: {line.soldQuantity} · Already returned:{" "}
                     {line.alreadyReturnedQuantity} · Max return:{" "}
                     {line.maxReturnQuantity}
                   </Text>
 
-                  <Text style={styles.mutedText}>
+                  <Text style={[styles.mutedText, { color: theme.textSecondary }]}>
                     Unit price: {formatMoney(line.unitPrice)}
                   </Text>
 
@@ -255,23 +257,23 @@ export function InvoiceReturnScreen({ route, navigation }: Props) {
           </AppCard>
 
           <AppCard style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>Return summary</Text>
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Return summary</Text>
 
             <View style={styles.rowBetween}>
-              <Text style={styles.label}>Return total</Text>
-              <Text style={styles.value}>{formatMoney(totals.returnTotal)}</Text>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Return total</Text>
+              <Text style={[styles.value, { color: theme.textPrimary }]}>{formatMoney(totals.returnTotal)}</Text>
             </View>
 
             <View style={styles.rowBetween}>
-              <Text style={styles.label}>Udhaar balance reduced</Text>
-              <Text style={styles.value}>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Udhaar balance reduced</Text>
+              <Text style={[styles.value, { color: theme.textPrimary }]}>
                 {formatMoney(totals.balanceReduced)}
               </Text>
             </View>
 
             <View style={styles.rowBetween}>
-              <Text style={styles.label}>Cash refund</Text>
-              <Text style={styles.refundText}>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Cash refund</Text>
+              <Text style={[styles.refundText, { color: theme.warning }]}>
                 {formatMoney(totals.cashRefund)}
               </Text>
             </View>

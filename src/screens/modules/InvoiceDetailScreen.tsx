@@ -18,6 +18,7 @@ import {
   printInvoice,
 } from "../../services/invoicePrintService";
 import { voidInvoice } from "../../database/invoiceVoidRepository";
+import { useAppTheme } from "../../theme/useAppTheme";
 import type { InvoicePrintData } from "../../types/invoicePrint";
 
 type Props = NativeStackScreenProps<RootStackParamList, "InvoiceDetail">;
@@ -66,6 +67,7 @@ function confirmVoidInvoice(): Promise<boolean> {
 }
 
 export function InvoiceDetailScreen({ route, navigation }: Props) {
+  const { theme } = useAppTheme();
   const { invoiceId } = route.params;
 
   const [invoice, setInvoice] = useState<InvoicePrintData | null>(null);
@@ -158,10 +160,10 @@ export function InvoiceDetailScreen({ route, navigation }: Props) {
 
   if (!invoice) {
     return (
-      <SafeAreaView style={styles.screen}>
+      <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
         <View style={styles.wrapper}>
           <AppCard>
-            <Text style={styles.errorText}>
+            <Text style={[styles.errorText, { color: theme.danger }]}>
               {error || "Invoice not found."}
             </Text>
           </AppCard>
@@ -171,7 +173,7 @@ export function InvoiceDetailScreen({ route, navigation }: Props) {
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.wrapper}>
           <AppCard style={styles.headerCard}>
@@ -184,7 +186,7 @@ export function InvoiceDetailScreen({ route, navigation }: Props) {
             />
 
             <View style={styles.statusPill}>
-              <Text style={styles.statusText}>
+              <Text style={[styles.statusText, { color: theme.primary }]}>
                 {(invoice.return_status ?? invoice.payment_status).toUpperCase()}
               </Text>
             </View>
@@ -215,35 +217,35 @@ export function InvoiceDetailScreen({ route, navigation }: Props) {
                 disabled={voiding}
               />
             ) : (
-              <Text style={styles.errorText}>This invoice is voided.</Text>
+              <Text style={[styles.errorText, { color: theme.danger }]}>This invoice is voided.</Text>
             )}
           </AppCard>
 
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          {error ? <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text> : null}
           {successMessage ? (
-            <Text style={styles.successText}>{successMessage}</Text>
+            <Text style={[styles.successText, { color: theme.success }]}>{successMessage}</Text>
           ) : null}
 
           <AppCard style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>Customer</Text>
-            <Text style={styles.bigText}>{invoice.customer_name}</Text>
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Customer</Text>
+            <Text style={[styles.bigText, { color: theme.textPrimary }]}>{invoice.customer_name}</Text>
           </AppCard>
 
           <AppCard style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>Items</Text>
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Items</Text>
 
             {invoice.lines.map((line, index) => (
-              <View key={line.id} style={styles.itemBox}>
+              <View key={line.id} style={[styles.itemBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
                 <View style={styles.rowBetween}>
-                  <Text style={styles.itemTitle}>
+                  <Text style={[styles.itemTitle, { color: theme.textPrimary }]}>
                     {index + 1}. {line.product_name}
                   </Text>
-                  <Text style={styles.moneyText}>
+                  <Text style={[styles.moneyText, { color: theme.success }]}>
                     {formatMoney(line.line_total)}
                   </Text>
                 </View>
 
-                    <Text style={styles.mutedText}>
+                    <Text style={[styles.mutedText, { color: theme.textSecondary }]}>
                   Qty {line.quantity}
                   {line.unit_price > 0
                     ? ` · Unit ${formatMoney(line.unit_price)}`
@@ -255,17 +257,17 @@ export function InvoiceDetailScreen({ route, navigation }: Props) {
           </AppCard>
 
           <AppCard style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>Totals</Text>
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Totals</Text>
 
             <View style={styles.rowBetween}>
-              <Text style={styles.label}>Grand total</Text>
-              <Text style={styles.value}>{formatMoney(invoice.grand_total)}</Text>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Grand total</Text>
+              <Text style={[styles.value, { color: theme.textPrimary }]}>{formatMoney(invoice.grand_total)}</Text>
             </View>
 
             {invoice.returned_total ? (
               <View style={styles.rowBetween}>
-                <Text style={styles.label}>Returned total</Text>
-                <Text style={styles.value}>
+                <Text style={[styles.label, { color: theme.textSecondary }]}>Returned total</Text>
+                <Text style={[styles.value, { color: theme.textPrimary }]}>
                   {formatMoney(invoice.returned_total)}
                 </Text>
               </View>
@@ -273,19 +275,19 @@ export function InvoiceDetailScreen({ route, navigation }: Props) {
 
             {invoice.net_total !== undefined ? (
               <View style={styles.rowBetween}>
-                <Text style={styles.label}>Net total</Text>
-                <Text style={styles.value}>{formatMoney(invoice.net_total)}</Text>
+                <Text style={[styles.label, { color: theme.textSecondary }]}>Net total</Text>
+                <Text style={[styles.value, { color: theme.textPrimary }]}>{formatMoney(invoice.net_total)}</Text>
               </View>
             ) : null}
 
             <View style={styles.rowBetween}>
-              <Text style={styles.label}>Paid amount</Text>
-              <Text style={styles.value}>{formatMoney(invoice.paid_amount)}</Text>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Paid amount</Text>
+              <Text style={[styles.value, { color: theme.textPrimary }]}>{formatMoney(invoice.paid_amount)}</Text>
             </View>
 
             <View style={styles.rowBetween}>
-              <Text style={styles.label}>Balance due</Text>
-              <Text style={styles.balanceText}>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Balance due</Text>
+              <Text style={[styles.balanceText, { color: theme.warning }]}>
                 {formatMoney(invoice.balance_due)}
               </Text>
             </View>

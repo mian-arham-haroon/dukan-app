@@ -14,10 +14,12 @@ import type { RootStackParamList } from "../../navigation/RootNavigator";
 import { ensureCloudProfile } from "../../services/businessCloudService";
 import { isSupabaseConfigured, supabase } from "../../services/supabase";
 import { useAuthStore } from "../../store/authStore";
+import { useAppTheme } from "../../theme/useAppTheme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Signup">;
 
 export function SignupScreen({ navigation }: Props) {
+  const { theme } = useAppTheme();
   const setSession = useAuthStore((state) => state.setSession);
 
   const [fullName, setFullName] = useState("");
@@ -100,7 +102,7 @@ export function SignupScreen({ navigation }: Props) {
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.wrapper}>
           <AppHeader
@@ -110,7 +112,7 @@ export function SignupScreen({ navigation }: Props) {
           />
 
           <AppCard style={styles.card}>
-            <Text style={styles.cardTitle}>Business owner details</Text>
+            <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Business owner details</Text>
 
             <AppInput
               label="Full name"
@@ -135,14 +137,14 @@ export function SignupScreen({ navigation }: Props) {
               secureTextEntry
             />
 
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            {error ? <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text> : null}
 
             {successMessage ? (
-              <Text style={styles.successText}>{successMessage}</Text>
+              <Text style={[styles.successText, { color: theme.success }]}>{successMessage}</Text>
             ) : null}
 
             {!isSupabaseConfigured ? (
-              <Text style={styles.warningText}>
+              <Text style={[styles.warningText, { backgroundColor: theme.warningSoft, borderColor: theme.warning, color: theme.warning }]}>
                 Supabase env values are missing. Add EXPO_PUBLIC_SUPABASE_URL
                 and EXPO_PUBLIC_SUPABASE_ANON_KEY in .env.
               </Text>

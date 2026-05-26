@@ -1,21 +1,27 @@
 import React from "react";
 import {
+  ActivityIndicator,
   Pressable,
+  PressableProps,
   StyleSheet,
   Text,
-  ViewStyle,
+  StyleProp,
   TextStyle,
+  ViewStyle,
 } from "react-native";
+import { useAppTheme } from "../theme/useAppTheme";
 
-type Variant = "primary" | "secondary";
+type Variant = "primary" | "secondary" | "danger";
 
-type Props = {
+type Props = Omit<PressableProps, "children" | "style" | "onPress" | "disabled"> & {
   title: string;
   onPress: () => void;
   variant?: Variant;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
   disabled?: boolean;
+  loading?: boolean;
+  fullWidth?: boolean;
 };
 
 export function AppButton({
@@ -25,64 +31,91 @@ export function AppButton({
   style,
   textStyle,
   disabled = false,
+  loading = false,
+  fullWidth = false,
+  accessibilityRole = "button",
+  ...pressableProps
 }: Props) {
+  const { theme } = useAppTheme();
+  const isDisabled = disabled || loading;
+
+  const variantStyles =
+    variant === "primary"
+      ? {
+          backgroundColor: theme.primary,
+          borderColor: theme.primary,
+        }
+      : variant === "danger"
+      ? {
+          backgroundColor: theme.danger,
+          borderColor: theme.danger,
+        }
+      : {
+          backgroundColor: theme.surfaceMuted,
+          borderWidth: 1,
+          borderColor: theme.borderStrong,
+        };
+
+  const textColor = isDisabled
+    ? theme.textMuted
+    : variant === "primary" || variant === "danger"
+    ? theme.primaryText
+    : theme.textPrimary;
+
   return (
     <Pressable
-      onPress={disabled ? undefined : onPress}
-      disabled={disabled}
+      accessibilityRole={accessibilityRole}
+      accessibilityState={{ disabled: isDisabled, busy: loading }}
+      onPress={isDisabled ? undefined : onPress}
+      disabled={isDisabled}
       style={({ pressed }) => [
         styles.base,
-        variant === "primary" ? styles.primary : styles.secondary,
-        disabled && styles.disabled,
-        !disabled && pressed && styles.pressed,
+        variantStyles,
+        fullWidth && styles.fullWidth,
+        isDisabled && {
+          backgroundColor: theme.surfaceMuted,
+          borderColor: theme.border,
+          opacity: 0.75,
+        },
+        !isDisabled && pressed && styles.pressed,
         style,
       ]}
+      {...pressableProps}
     >
-      <Text
-        style={[
-          styles.text,
-          variant === "primary" ? styles.primaryText : styles.secondaryText,
-          disabled && styles.disabledText,
-          textStyle,
-        ]}
-      >
-        {title}
-      </Text>
+      {loading ? (
+        <ActivityIndicator
+          color={textColor}
+          size="small"
+          style={styles.loadingIndicator}
+        />
+      ) : null}
+      <Text style={[styles.text, { color: textColor }, textStyle]}>{title}</Text>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   base: {
-    minHeight: 52,
-    borderRadius: 14,
+    minHeight: 54,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 18,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderWidth: 1,
+    flexDirection: "row",
   },
-  primary: {
-    backgroundColor: "#2563EB",
-  },
-  secondary: {
-    backgroundColor: "#E2E8F0",
+  fullWidth: {
+    alignSelf: "stretch",
   },
   pressed: {
-    opacity: 0.9,
-  },
-  disabled: {
-    opacity: 0.55,
+    opacity: 0.86,
   },
   text: {
-    fontSize: 16,
-    fontWeight: "700",
+    fontSize: 15,
+    fontWeight: "800",
   },
-  primaryText: {
-    color: "#FFFFFF",
-  },
-  secondaryText: {
-    color: "#0F172A",
-  },
-  disabledText: {
-    color: "#94A3B8",
+  loadingIndicator: {
+    marginRight: 8,
   },
 });

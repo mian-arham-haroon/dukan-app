@@ -5,6 +5,8 @@ import { StatusBar } from "expo-status-bar";
 import { RootNavigator } from "./src/navigation/RootNavigator";
 import { runDatabaseTest } from "./src/database/databaseTest";
 import { startAutoSyncWatcher, stopAutoSyncWatcher } from "./src/services/autoSyncService";
+import { ThemeProvider } from "./src/theme/ThemeProvider";
+import { useAppTheme } from "./src/theme/useAppTheme";
 type AppStatus = {
   loading: boolean;
   success: boolean;
@@ -13,7 +15,17 @@ type AppStatus = {
 };
 
 export default function App() {
-    useEffect(() => {
+  return (
+    <ThemeProvider>
+      <AppShell />
+    </ThemeProvider>
+  );
+}
+
+function AppShell() {
+  const { theme, mode } = useAppTheme();
+
+  useEffect(() => {
     startAutoSyncWatcher();
 
     return () => {
@@ -61,47 +73,56 @@ export default function App() {
 
   if (appStatus.loading) {
     return (
-      <View style={styles.center}>
-        <StatusBar style="auto" />
-        <ActivityIndicator size="large" color="#2563EB" />
-        <Text style={styles.loadingText}>{appStatus.message}</Text>
+      <View style={[styles.center, { backgroundColor: theme.background }]}>
+        <StatusBar style={mode === "dark" ? "light" : "dark"} />
+        <ActivityIndicator size="large" color={theme.primary} />
+        <Text style={[styles.loadingText, { color: theme.textSecondary }]}>{appStatus.message}</Text>
       </View>
     );
   }
 
   if (!appStatus.success) {
     return (
-      <View style={styles.center}>
-        <StatusBar style="auto" />
+      <View style={[styles.center, { backgroundColor: theme.background }]}>
+        <StatusBar style={mode === "dark" ? "light" : "dark"} />
 
-        <View style={styles.errorCard}>
-          <Text style={styles.errorTitle}>Database Error</Text>
-          <Text style={styles.errorText}>{appStatus.message}</Text>
+        <View style={[styles.errorCard, { backgroundColor: theme.card, borderColor: theme.danger }]}>
+          <Text style={[styles.errorTitle, { color: theme.danger }]}>Database Error</Text>
+          <Text style={[styles.errorText, { color: theme.textSecondary }]}>{appStatus.message}</Text>
 
           {appStatus.error ? (
-            <Text style={styles.errorDetails}>{appStatus.error}</Text>
+            <Text style={[styles.errorDetails, { color: theme.danger }]}>{appStatus.error}</Text>
           ) : null}
 
           <Pressable
-            style={styles.retryButton}
+            style={[styles.retryButton, { backgroundColor: theme.primary }]}
             onPress={() => setRetryKey((current) => current + 1)}
           >
-            <Text style={styles.retryButtonText}>Retry</Text>
+            <Text style={[styles.retryButtonText, { color: theme.primaryText }]}>Retry</Text>
           </Pressable>
         </View>
       </View>
     );
   }
 
+  return <AppContent />;
+}
+
+function AppContent() {
+  const { theme, mode } = useAppTheme();
+
   return (
-    <>
+    <View style={[styles.appRoot, { backgroundColor: theme.background }]}>
       <RootNavigator />
-      <StatusBar style="auto" />
-    </>
+      <StatusBar style={mode === "dark" ? "light" : "dark"} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  appRoot: {
+    flex: 1,
+  },
   center: {
     flex: 1,
     backgroundColor: "#F8FAFC",

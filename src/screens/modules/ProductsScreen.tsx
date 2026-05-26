@@ -18,6 +18,8 @@ import {
   EmptyState,
   LoadingState,
 } from "../../components/ui";
+import { AppText } from "../../components/AppText";
+import { useAppTheme } from "../../theme/useAppTheme";
 import {
   createProduct,
   deleteProduct,
@@ -43,6 +45,7 @@ function parseNumber(value: string): number {
 }
 
 export function ProductsScreen() {
+  const { theme } = useAppTheme();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -239,7 +242,7 @@ export function ProductsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.wrapper}>
           <AppCard style={styles.headerCard}>
@@ -250,27 +253,29 @@ export function ProductsScreen() {
             />
 
             <View style={styles.summaryRow}>
-              <View style={styles.summaryBox}>
-                <Text style={styles.summaryLabel}>Products</Text>
-                <Text style={styles.summaryValue}>{products.length}</Text>
+              <View style={[styles.summaryBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>Products</Text>
+                <Text style={[styles.summaryValue, { color: theme.textPrimary }]}>{products.length}</Text>
+                <Text style={[styles.summaryHint, { color: theme.textMuted }]}>Active items</Text>
               </View>
 
-              <View style={styles.summaryBox}>
-                <Text style={styles.summaryLabel}>Total stock</Text>
-                <Text style={styles.summaryValue}>{totalStock}</Text>
+              <View style={[styles.summaryBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>Total stock</Text>
+                <Text style={[styles.summaryValue, { color: theme.textPrimary }]}>{totalStock}</Text>
+                <Text style={[styles.summaryHint, { color: theme.textMuted }]}>Units on hand</Text>
               </View>
             </View>
           </AppCard>
 
           <AppCard style={styles.formCard}>
             <View style={styles.formTitleRow}>
-              <Text style={styles.cardTitle}>
+              <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>
                 {isEditing ? "Edit product" : "Add product"}
               </Text>
 
               {isEditing ? (
-                <Pressable style={styles.cancelEditButton} onPress={resetForm}>
-                  <Text style={styles.cancelEditButtonText}>Cancel edit</Text>
+                <Pressable style={[styles.cancelEditButton, { backgroundColor: theme.cardMuted, borderColor: theme.border }]} onPress={resetForm}>
+                  <Text style={[styles.cancelEditButtonText, { color: theme.textPrimary }]}>Cancel edit</Text>
                 </Pressable>
               ) : null}
             </View>
@@ -320,7 +325,7 @@ export function ProductsScreen() {
               keyboardType="numeric"
             />
 
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            {error ? <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text> : null}
 
             <AppButton
               title={
@@ -332,6 +337,7 @@ export function ProductsScreen() {
               }
               onPress={handleSaveProduct}
               disabled={saving || deleting}
+              fullWidth
             />
           </AppCard>
 
@@ -344,29 +350,38 @@ export function ProductsScreen() {
             />
           ) : (
             <View style={styles.listSection}>
-              <Text style={styles.sectionTitle}>Product list</Text>
+              <View style={styles.sectionHeader}>
+                <AppText variant="title" style={styles.sectionTitle}>Product list</AppText>
+                <AppText variant="caption" tone="muted">{products.length} products</AppText>
+              </View>
 
               {products.map((product) => (
                 <AppCard key={product.id} style={styles.productCard}>
                   <View style={styles.productTopRow}>
                     <View style={styles.productInfo}>
-                      <Text style={styles.productName}>{product.name}</Text>
-                      <Text style={styles.productMeta}>
-                        SKU: {product.sku || "N/A"} • Unit: {product.unit}
-                      </Text>
+                      <View style={styles.nameRow}>
+                        <Text style={[styles.productName, { color: theme.textPrimary }]}>{product.name}</Text>
+                        {product.stock_quantity <= 5 ? (
+                          <View style={[styles.lowStockBadge, { backgroundColor: theme.warningSoft, borderColor: theme.warning }]}>
+                            <Text style={[styles.lowStockBadgeText, { color: theme.warning }]}>Low stock</Text>
+                          </View>
+                        ) : null}
+                      </View>
+                      <Text style={[styles.productMeta, { color: theme.textSecondary }]}>SKU: {product.sku || "N/A"} - Unit: {product.unit}</Text>
                     </View>
 
                     <View style={styles.actionRow}>
                       <Pressable
-                        style={styles.editButton}
+                        style={[styles.editButton, { backgroundColor: theme.primarySoft, borderColor: theme.primary }]}
                         onPress={() => handleStartEdit(product)}
                       >
-                        <Text style={styles.editButtonText}>Edit</Text>
+                        <Text style={[styles.editButtonText, { color: theme.primary }]}>Edit</Text>
                       </Pressable>
 
                       <Pressable
                         style={[
                           styles.deleteButton,
+                          { backgroundColor: theme.dangerSoft, borderColor: theme.danger },
                           deleting ? styles.disabledButton : null,
                         ]}
                         onPress={() => {
@@ -375,31 +390,25 @@ export function ProductsScreen() {
                           }
                         }}
                       >
-                        <Text style={styles.deleteButtonText}>Delete</Text>
+                        <Text style={[styles.deleteButtonText, { color: theme.danger }]}>Delete</Text>
                       </Pressable>
                     </View>
                   </View>
 
                   <View style={styles.productStatsRow}>
-                    <View style={styles.productStat}>
-                      <Text style={styles.statLabel}>Cost</Text>
-                      <Text style={styles.statValue}>
-                        Rs {product.cost_price}
-                      </Text>
+                    <View style={[styles.productStat, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                      <Text style={[styles.statLabel, { color: theme.textMuted }]}>Cost</Text>
+                      <Text style={[styles.statValue, { color: theme.textPrimary }]}>Rs {product.cost_price}</Text>
                     </View>
 
-                    <View style={styles.productStat}>
-                      <Text style={styles.statLabel}>Selling</Text>
-                      <Text style={styles.statValue}>
-                        Rs {product.selling_price}
-                      </Text>
+                    <View style={[styles.productStat, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                      <Text style={[styles.statLabel, { color: theme.textMuted }]}>Selling</Text>
+                      <Text style={[styles.statValue, { color: theme.textPrimary }]}>Rs {product.selling_price}</Text>
                     </View>
 
-                    <View style={styles.productStat}>
-                      <Text style={styles.statLabel}>Stock</Text>
-                      <Text style={styles.statValue}>
-                        {product.stock_quantity}
-                      </Text>
+                    <View style={[styles.productStat, { backgroundColor: product.stock_quantity <= 5 ? theme.warningSoft : theme.cardMuted, borderColor: product.stock_quantity <= 5 ? theme.warning : theme.border }]}>
+                      <Text style={[styles.statLabel, { color: theme.textMuted }]}>Stock</Text>
+                      <Text style={[styles.statValue, { color: product.stock_quantity <= 5 ? theme.warning : theme.textPrimary }]}>{product.stock_quantity}</Text>
                     </View>
                   </View>
                 </AppCard>
@@ -419,39 +428,50 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
+    paddingBottom: 36,
   },
   wrapper: {
     width: "100%",
     maxWidth: 900,
     alignSelf: "center",
+    gap: 16,
   },
   headerCard: {
-    marginBottom: 16,
+    borderRadius: 16,
   },
   summaryRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 12,
   },
   summaryBox: {
     flex: 1,
+    minWidth: 180,
     backgroundColor: "#F8FAFC",
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: 12,
+    padding: 16,
     borderWidth: 1,
     borderColor: "#E2E8F0",
   },
   summaryLabel: {
-    fontSize: 13,
+    fontSize: 12,
     color: "#64748B",
     marginBottom: 6,
+    fontWeight: "800",
+    textTransform: "uppercase",
   },
   summaryValue: {
-    fontSize: 24,
-    fontWeight: "800",
+    fontSize: 26,
+    fontWeight: "900",
     color: "#0F172A",
   },
+  summaryHint: {
+    fontSize: 12,
+    fontWeight: "700",
+    marginTop: 4,
+  },
   formCard: {
-    marginBottom: 16,
+    borderRadius: 16,
   },
   formTitleRow: {
     flexDirection: "row",
@@ -462,7 +482,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "900",
     color: "#0F172A",
   },
   cancelEditButton: {
@@ -470,6 +490,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 999,
+    borderWidth: 1,
   },
   cancelEditButtonText: {
     fontSize: 12,
@@ -478,10 +499,12 @@ const styles = StyleSheet.create({
   },
   formGrid: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 12,
   },
   formColumn: {
     flex: 1,
+    minWidth: 180,
   },
   errorText: {
     fontSize: 13,
@@ -490,32 +513,43 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   listSection: {
-    marginTop: 4,
+    gap: 12,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    gap: 12,
   },
   sectionTitle: {
     fontSize: 22,
-    fontWeight: "800",
+    fontWeight: "900",
     color: "#0F172A",
-    marginBottom: 12,
   },
   productCard: {
-    marginBottom: 12,
+    borderRadius: 16,
   },
   productTopRow: {
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "space-between",
     gap: 12,
-    marginBottom: 14,
+    marginBottom: 16,
   },
   productInfo: {
     flex: 1,
   },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 4,
+  },
   productName: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "900",
     color: "#0F172A",
-    marginBottom: 4,
   },
   productMeta: {
     fontSize: 13,
@@ -523,6 +557,7 @@ const styles = StyleSheet.create({
   },
   actionRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
   },
   editButton: {
@@ -530,6 +565,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 999,
+    borderWidth: 1,
   },
   editButtonText: {
     color: "#1D4ED8",
@@ -541,6 +577,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 999,
+    borderWidth: 1,
   },
   deleteButtonText: {
     color: "#B91C1C",
@@ -552,13 +589,16 @@ const styles = StyleSheet.create({
   },
   productStatsRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 10,
   },
   productStat: {
     flex: 1,
+    minWidth: 120,
     backgroundColor: "#F8FAFC",
     borderRadius: 12,
     padding: 12,
+    borderWidth: 1,
   },
   statLabel: {
     fontSize: 12,
@@ -567,7 +607,18 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "900",
     color: "#0F172A",
+  },
+  lowStockBadge: {
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  lowStockBadgeText: {
+    fontSize: 11,
+    fontWeight: "900",
+    textTransform: "uppercase",
   },
 });

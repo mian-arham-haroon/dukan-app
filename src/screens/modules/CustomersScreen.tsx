@@ -18,6 +18,7 @@ import {
   EmptyState,
   LoadingState,
 } from "../../components/ui";
+import { AppText } from "../../components/AppText";
 import {
   createCustomer,
   deleteCustomer,
@@ -25,6 +26,8 @@ import {
   updateCustomer,
 } from "../../database/customersRepository";
 import type { Customer } from "../../types/customer";
+
+import { useAppTheme } from "../../theme/useAppTheme";
 
 function parseNumber(value: string): number {
   const cleaned = value.trim().replace(/,/g, "");
@@ -43,6 +46,7 @@ function parseNumber(value: string): number {
 }
 
 export function CustomersScreen() {
+  const { theme } = useAppTheme();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -231,8 +235,10 @@ export function CustomersScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
+      <ScrollView
+        contentContainerStyle={[styles.scrollContent, { backgroundColor: theme.background }]}
+      >
         <View style={styles.wrapper}>
           <AppCard style={styles.headerCard}>
             <AppHeader
@@ -242,27 +248,29 @@ export function CustomersScreen() {
             />
 
             <View style={styles.summaryRow}>
-              <View style={styles.summaryBox}>
-                <Text style={styles.summaryLabel}>Customers</Text>
-                <Text style={styles.summaryValue}>{customers.length}</Text>
+              <View style={[styles.summaryBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>Customers</Text>
+                <Text style={[styles.summaryValue, { color: theme.textPrimary }]}>{customers.length}</Text>
+                <Text style={[styles.summaryHint, { color: theme.textMuted }]}>Active records</Text>
               </View>
 
-              <View style={styles.summaryBox}>
-                <Text style={styles.summaryLabel}>Total balance</Text>
-                <Text style={styles.summaryValue}>Rs {totalBalance}</Text>
+              <View style={[styles.summaryBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>Total balance</Text>
+                <Text style={[styles.summaryValue, { color: theme.textPrimary }]}>Rs {totalBalance}</Text>
+                <Text style={[styles.summaryHint, { color: theme.textMuted }]}>Current receivable</Text>
               </View>
             </View>
           </AppCard>
 
           <AppCard style={styles.formCard}>
             <View style={styles.formTitleRow}>
-              <Text style={styles.cardTitle}>
+              <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>
                 {isEditing ? "Edit customer" : "Add customer"}
               </Text>
 
               {isEditing ? (
-                <Pressable style={styles.cancelEditButton} onPress={resetForm}>
-                  <Text style={styles.cancelEditButtonText}>Cancel edit</Text>
+                <Pressable style={[styles.cancelEditButton, { backgroundColor: theme.cardMuted, borderColor: theme.border }]} onPress={resetForm}>
+                  <Text style={[styles.cancelEditButtonText, { color: theme.textPrimary }]}>Cancel edit</Text>
                 </Pressable>
               ) : null}
             </View>
@@ -311,7 +319,7 @@ export function CustomersScreen() {
               </View>
             </View>
 
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            {error ? <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text> : null}
 
             <AppButton
               title={
@@ -323,6 +331,7 @@ export function CustomersScreen() {
               }
               onPress={handleSaveCustomer}
               disabled={saving || deleting}
+              fullWidth
             />
           </AppCard>
 
@@ -335,26 +344,25 @@ export function CustomersScreen() {
             />
           ) : (
             <View style={styles.listSection}>
-              <Text style={styles.sectionTitle}>Customer list</Text>
+              <View style={styles.sectionHeader}>
+                <AppText variant="title" style={styles.sectionTitle}>Customer list</AppText>
+                <AppText variant="caption" tone="muted">{customers.length} customers</AppText>
+              </View>
 
               {customers.map((customer) => (
                 <AppCard key={customer.id} style={styles.customerCard}>
                   <View style={styles.customerTopRow}>
                     <View style={styles.customerInfo}>
-                      <Text style={styles.customerName}>{customer.name}</Text>
+                      <Text style={[styles.customerName, { color: theme.textPrimary }]}>{customer.name}</Text>
 
-                      <Text style={styles.customerMeta}>
-                        Phone: {customer.phone || "N/A"}
-                      </Text>
+                      <Text style={[styles.customerMeta, { color: theme.textSecondary }]}>Phone: {customer.phone || "N/A"}</Text>
 
-                      <Text style={styles.customerMeta}>
-                        Address: {customer.address || "N/A"}
-                      </Text>
+                      <Text style={[styles.customerMeta, { color: theme.textSecondary }]}>Address: {customer.address || "N/A"}</Text>
                     </View>
 
                     <View style={styles.actionRow}>
                       <Pressable
-                        style={styles.editButton}
+                        style={[styles.editButton, { backgroundColor: theme.primarySoft, borderColor: theme.primary }]}
                         onPress={() => {
                           if (!saving && !deleting) {
                             handleStartEdit(customer);
@@ -362,12 +370,13 @@ export function CustomersScreen() {
                         }}
                         disabled={saving || deleting}
                       >
-                        <Text style={styles.editButtonText}>Edit</Text>
+                        <Text style={[styles.editButtonText, { color: theme.primary }]}>Edit</Text>
                       </Pressable>
 
                       <Pressable
                         style={[
                           styles.deleteButton,
+                          { backgroundColor: theme.dangerSoft, borderColor: theme.danger },
                           (saving || deleting) ? styles.disabledButton : null,
                         ]}
                         onPress={() => {
@@ -377,31 +386,25 @@ export function CustomersScreen() {
                         }}
                         disabled={saving || deleting}
                       >
-                        <Text style={styles.deleteButtonText}>Delete</Text>
+                        <Text style={[styles.deleteButtonText, { color: theme.danger }]}>Delete</Text>
                       </Pressable>
                     </View>
                   </View>
 
                   <View style={styles.customerStatsRow}>
-                    <View style={styles.customerStat}>
-                      <Text style={styles.statLabel}>Opening</Text>
-                      <Text style={styles.statValue}>
-                        Rs {customer.opening_balance}
-                      </Text>
+                    <View style={[styles.customerStat, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                      <Text style={[styles.statLabel, { color: theme.textMuted }]}>Opening</Text>
+                      <Text style={[styles.statValue, { color: theme.textPrimary }]}>Rs {customer.opening_balance}</Text>
                     </View>
 
-                    <View style={styles.customerStat}>
-                      <Text style={styles.statLabel}>Current</Text>
-                      <Text style={styles.statValue}>
-                        Rs {customer.current_balance}
-                      </Text>
+                    <View style={[styles.customerStat, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                      <Text style={[styles.statLabel, { color: theme.textMuted }]}>Current</Text>
+                      <Text style={[styles.statValue, { color: theme.textPrimary }]}>Rs {customer.current_balance}</Text>
                     </View>
 
-                    <View style={styles.customerStat}>
-                      <Text style={styles.statLabel}>Limit</Text>
-                      <Text style={styles.statValue}>
-                        Rs {customer.credit_limit}
-                      </Text>
+                    <View style={[styles.customerStat, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                      <Text style={[styles.statLabel, { color: theme.textMuted }]}>Limit</Text>
+                      <Text style={[styles.statValue, { color: theme.textPrimary }]}>Rs {customer.credit_limit}</Text>
                     </View>
                   </View>
                 </AppCard>
@@ -421,39 +424,50 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: 20,
+    paddingBottom: 36,
   },
   wrapper: {
     width: "100%",
     maxWidth: 900,
     alignSelf: "center",
+    gap: 16,
   },
   headerCard: {
-    marginBottom: 16,
+    borderRadius: 16,
   },
   summaryRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 12,
   },
   summaryBox: {
     flex: 1,
+    minWidth: 180,
     backgroundColor: "#F8FAFC",
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: 12,
+    padding: 16,
     borderWidth: 1,
     borderColor: "#E2E8F0",
   },
   summaryLabel: {
-    fontSize: 13,
+    fontSize: 12,
     color: "#64748B",
     marginBottom: 6,
+    fontWeight: "800",
+    textTransform: "uppercase",
   },
   summaryValue: {
-    fontSize: 24,
-    fontWeight: "800",
+    fontSize: 26,
+    fontWeight: "900",
     color: "#0F172A",
   },
+  summaryHint: {
+    fontSize: 12,
+    fontWeight: "700",
+    marginTop: 4,
+  },
   formCard: {
-    marginBottom: 16,
+    borderRadius: 16,
   },
   formTitleRow: {
     flexDirection: "row",
@@ -464,7 +478,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "900",
     color: "#0F172A",
   },
   cancelEditButton: {
@@ -472,6 +486,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 999,
+    borderWidth: 1,
   },
   cancelEditButtonText: {
     fontSize: 12,
@@ -480,10 +495,12 @@ const styles = StyleSheet.create({
   },
   formGrid: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 12,
   },
   formColumn: {
     flex: 1,
+    minWidth: 180,
   },
   errorText: {
     fontSize: 13,
@@ -492,30 +509,35 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   listSection: {
-    marginTop: 4,
+    gap: 12,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    gap: 12,
   },
   sectionTitle: {
     fontSize: 22,
-    fontWeight: "800",
+    fontWeight: "900",
     color: "#0F172A",
-    marginBottom: 12,
   },
   customerCard: {
-    marginBottom: 12,
+    borderRadius: 16,
   },
   customerTopRow: {
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "space-between",
     gap: 12,
-    marginBottom: 14,
+    marginBottom: 16,
   },
   customerInfo: {
     flex: 1,
   },
   customerName: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "900",
     color: "#0F172A",
     marginBottom: 4,
   },
@@ -526,6 +548,7 @@ const styles = StyleSheet.create({
   },
   actionRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
   },
   editButton: {
@@ -533,6 +556,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 999,
+    borderWidth: 1,
   },
   editButtonText: {
     color: "#1D4ED8",
@@ -544,6 +568,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 999,
+    borderWidth: 1,
   },
   deleteButtonText: {
     color: "#B91C1C",
@@ -555,13 +580,16 @@ const styles = StyleSheet.create({
   },
   customerStatsRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 10,
   },
   customerStat: {
     flex: 1,
+    minWidth: 120,
     backgroundColor: "#F8FAFC",
     borderRadius: 12,
     padding: 12,
+    borderWidth: 1,
   },
   statLabel: {
     fontSize: 12,
@@ -570,7 +598,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "900",
     color: "#0F172A",
   },
 });

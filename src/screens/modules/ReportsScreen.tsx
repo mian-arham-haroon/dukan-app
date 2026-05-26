@@ -17,6 +17,7 @@ import {
 } from "../../components/ui";
 import { getReportsSummary } from "../../database/reportsRepository";
 import { repairCustomerBalancesFromInvoices } from "../../database/udhaarRepository";
+import { useAppTheme } from "../../theme/useAppTheme";
 import type { ReportRange, ReportsSummary } from "../../types/report";
 
 function formatMoney(value: number): string {
@@ -34,6 +35,7 @@ function formatDate(value: string): string {
 }
 
 export function ReportsScreen() {
+  const { theme } = useAppTheme();
   const [summary, setSummary] = useState<ReportsSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -100,7 +102,7 @@ export function ReportsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.wrapper}>
           <AppCard style={styles.headerCard}>
@@ -137,10 +139,10 @@ export function ReportsScreen() {
               />
             </View>
 
-            <AppButton title="Refresh reports" onPress={loadReports} />
+            <AppButton title="Refresh reports" onPress={loadReports} fullWidth />
           </AppCard>
 
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          {error ? <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text> : null}
 
           <View style={styles.grid}>
             <MetricCard
@@ -193,54 +195,54 @@ export function ReportsScreen() {
           </View>
 
           <AppCard style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>Business counts</Text>
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Business counts</Text>
 
-            <View style={styles.rowBetween}>
-              <Text style={styles.label}>Products</Text>
-              <Text style={styles.value}>{summary.productCount}</Text>
+            <View style={[styles.rowBetween, styles.infoRow, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Products</Text>
+              <Text style={[styles.value, { color: theme.textPrimary }]}>{summary.productCount}</Text>
             </View>
 
-            <View style={styles.rowBetween}>
-              <Text style={styles.label}>Customers</Text>
-              <Text style={styles.value}>{summary.customerCount}</Text>
+            <View style={[styles.rowBetween, styles.infoRow, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Customers</Text>
+              <Text style={[styles.value, { color: theme.textPrimary }]}>{summary.customerCount}</Text>
             </View>
 
-            <View style={styles.rowBetween}>
-              <Text style={styles.label}>Invoices</Text>
-              <Text style={styles.value}>{summary.invoiceCount}</Text>
+            <View style={[styles.rowBetween, styles.infoRow, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Invoices</Text>
+              <Text style={[styles.value, { color: theme.textPrimary }]}>{summary.invoiceCount}</Text>
             </View>
           </AppCard>
 
           <AppCard style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>Reconciliation</Text>
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Reconciliation</Text>
 
-            <View style={styles.rowBetween}>
-              <Text style={styles.label}>Opening balance total</Text>
-              <Text style={styles.value}>{formatMoney(summary.openingBalanceTotal)}</Text>
+            <View style={[styles.rowBetween, styles.infoRow, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Opening balance total</Text>
+              <Text style={[styles.value, { color: theme.textPrimary }]}>{formatMoney(summary.openingBalanceTotal)}</Text>
             </View>
 
-            <View style={styles.rowBetween}>
-              <Text style={styles.label}>All-time invoice unpaid total</Text>
-              <Text style={styles.value}>{formatMoney(summary.invoiceUnpaidTotal)}</Text>
+            <View style={[styles.rowBetween, styles.infoRow, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>All-time invoice unpaid total</Text>
+              <Text style={[styles.value, { color: theme.textPrimary }]}>{formatMoney(summary.invoiceUnpaidTotal)}</Text>
             </View>
 
-            <View style={styles.rowBetween}>
-              <Text style={styles.label}>Expected customer balance</Text>
-              <Text style={styles.value}>{formatMoney(summary.expectedCustomerBalance)}</Text>
+            <View style={[styles.rowBetween, styles.infoRow, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Expected customer balance</Text>
+              <Text style={[styles.value, { color: theme.textPrimary }]}>{formatMoney(summary.expectedCustomerBalance)}</Text>
             </View>
 
-            <View style={styles.rowBetween}>
-              <Text style={styles.label}>Customer balance total</Text>
-              <Text style={styles.value}>{formatMoney(summary.customerBalanceTotal)}</Text>
+            <View style={[styles.rowBetween, styles.infoRow, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Customer balance total</Text>
+              <Text style={[styles.value, { color: theme.textPrimary }]}>{formatMoney(summary.customerBalanceTotal)}</Text>
             </View>
 
-            <View style={styles.rowBetween}>
-              <Text style={styles.label}>Difference</Text>
-              <Text style={styles.value}>{formatMoney(summary.udhaarDifference)}</Text>
+            <View style={[styles.rowBetween, styles.infoRow, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Difference</Text>
+              <Text style={[styles.value, { color: summary.udhaarDifference === 0 ? theme.success : theme.warning }]}>{formatMoney(summary.udhaarDifference)}</Text>
             </View>
 
             {summary.udhaarDifference !== 0 ? (
-              <Text style={styles.warningText}>
+              <Text style={[styles.warningBanner, { color: theme.warning, backgroundColor: theme.warningSoft, borderColor: theme.warning }]}>
                 Udhaar mismatch found. Customer balances and invoice balances are not equal.
               </Text>
             ) : null}
@@ -272,57 +274,57 @@ export function ReportsScreen() {
           </AppCard>
 
           <AppCard style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>Recent invoices</Text>
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Recent invoices</Text>
 
             {summary.recentInvoices.length === 0 ? (
-              <Text style={styles.mutedText}>No invoices yet.</Text>
+              <Text style={[styles.mutedText, { color: theme.textMuted }]}>No invoices yet.</Text>
             ) : (
               summary.recentInvoices.map((invoice) => (
-                <View key={invoice.id} style={styles.listItem}>
+                <View key={invoice.id} style={[styles.listItem, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
                   <View style={styles.rowBetween}>
-                    <Text style={styles.itemTitle}>{invoice.invoice_no}</Text>
-                    <Text style={styles.moneyText}>
+                    <Text style={[styles.itemTitle, { color: theme.textPrimary }]}>{invoice.invoice_no}</Text>
+                    <Text style={[styles.moneyText, { color: theme.success, backgroundColor: theme.successSoft }]}>
                       {formatMoney(invoice.grand_total)}
                     </Text>
                   </View>
 
-                  <Text style={styles.itemText}>{invoice.customer_name}</Text>
-                  <Text style={styles.itemText}>{invoice.item_summary}</Text>
-                  <Text style={styles.itemText}>
+                  <Text style={[styles.itemText, { color: theme.textSecondary }]}>{invoice.customer_name}</Text>
+                  <Text style={[styles.itemText, { color: theme.textSecondary }]}>{invoice.item_summary}</Text>
+                  <Text style={[styles.itemText, { color: theme.textSecondary }]}>
                     {(invoice.return_status ?? invoice.payment_status).toUpperCase()} · Paid{" "}
                     {formatMoney(invoice.paid_amount)} · Balance{" "}
                     {formatMoney(invoice.balance_due)}
                   </Text>
                   {invoice.returned_total ? (
-                    <Text style={styles.itemText}>
+                    <Text style={[styles.itemText, { color: theme.textSecondary }]}>
                       Returned {formatMoney(invoice.returned_total)} · Net {formatMoney(invoice.net_total ?? 0)}
                     </Text>
                   ) : null}
-                  <Text style={styles.dateText}>{formatDate(invoice.created_at)}</Text>
+                  <Text style={[styles.dateText, { color: theme.textMuted }]}>{formatDate(invoice.created_at)}</Text>
                 </View>
               ))
             )}
           </AppCard>
 
           <AppCard style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>Low stock products</Text>
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Low stock products</Text>
 
             {summary.lowStockProducts.length === 0 ? (
-              <Text style={styles.mutedText}>No low stock products.</Text>
+              <Text style={[styles.mutedText, { color: theme.textMuted }]}>No low stock products.</Text>
             ) : (
               summary.lowStockProducts.map((product) => (
-                <View key={product.id} style={styles.listItem}>
+                <View key={product.id} style={[styles.listItem, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
                   <View style={styles.rowBetween}>
-                    <Text style={styles.itemTitle}>{product.name}</Text>
-                    <Text style={styles.warningText}>
+                    <Text style={[styles.itemTitle, { color: theme.textPrimary }]}>{product.name}</Text>
+                    <Text style={[styles.warningText, { color: theme.warning, backgroundColor: theme.warningSoft }]}>
                       Stock {product.stock_quantity}
                     </Text>
                   </View>
 
-                  <Text style={styles.itemText}>
+                  <Text style={[styles.itemText, { color: theme.textSecondary }]}>
                     Alert level: {product.low_stock_alert}
                   </Text>
-                  <Text style={styles.itemText}>
+                  <Text style={[styles.itemText, { color: theme.textSecondary }]}>
                     Cost {formatMoney(product.cost_price)} · Selling{" "}
                     {formatMoney(product.selling_price)}
                   </Text>
@@ -343,11 +345,13 @@ type MetricCardProps = {
 };
 
 function MetricCard({ title, value, subtitle }: MetricCardProps) {
+  const { theme } = useAppTheme();
+
   return (
-    <AppCard style={styles.metricCard}>
-      <Text style={styles.metricTitle}>{title}</Text>
-      <Text style={styles.metricValue}>{value}</Text>
-      <Text style={styles.metricSubtitle}>{subtitle}</Text>
+    <AppCard variant="muted" style={styles.metricCard}>
+      <Text style={[styles.metricTitle, { color: theme.textSecondary }]}>{title}</Text>
+      <Text style={[styles.metricValue, { color: theme.textPrimary }]}>{value}</Text>
+      <Text style={[styles.metricSubtitle, { color: theme.textMuted }]}>{subtitle}</Text>
     </AppCard>
   );
 }
@@ -355,20 +359,21 @@ function MetricCard({ title, value, subtitle }: MetricCardProps) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#f8fafc",
+    backgroundColor: "#F8FAFC",
   },
   scrollContent: {
-    padding: 16,
+    padding: 20,
     paddingBottom: 40,
   },
   wrapper: {
     width: "100%",
     maxWidth: 900,
     alignSelf: "center",
-    gap: 14,
+    gap: 16,
   },
   headerCard: {
     gap: 14,
+    borderRadius: 16,
   },
   grid: {
     flexDirection: "row",
@@ -378,15 +383,18 @@ const styles = StyleSheet.create({
   metricCard: {
     flexGrow: 1,
     flexBasis: 190,
+    minWidth: 190,
     gap: 6,
+    borderRadius: 16,
   },
   metricTitle: {
-    fontSize: 13,
-    fontWeight: "700",
+    fontSize: 12,
+    fontWeight: "900",
     color: "#64748b",
+    textTransform: "uppercase",
   },
   metricValue: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "900",
     color: "#0f172a",
   },
@@ -396,10 +404,11 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   sectionCard: {
-    gap: 10,
+    gap: 12,
+    borderRadius: 16,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "900",
     color: "#0f172a",
   },
@@ -409,28 +418,38 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   rangeButton: {
-    flexShrink: 1,
+    flexGrow: 1,
+    minWidth: 132,
   },
   rowBetween: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
+    flexWrap: "wrap",
     gap: 12,
+  },
+  infoRow: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
   },
   label: {
     fontSize: 14,
     color: "#64748b",
+    flex: 1,
   },
   value: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "900",
     color: "#0f172a",
+    textAlign: "right",
   },
   listItem: {
     borderWidth: 1,
     borderColor: "#e2e8f0",
-    borderRadius: 14,
-    padding: 12,
-    gap: 4,
+    borderRadius: 12,
+    padding: 14,
+    gap: 6,
     backgroundColor: "#ffffff",
   },
   itemTitle: {
@@ -450,11 +469,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "900",
     color: "#166534",
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
   },
   warningText: {
     fontSize: 14,
     fontWeight: "900",
     color: "#b45309",
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  warningBanner: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 13,
+    fontWeight: "800",
+    lineHeight: 19,
   },
   dateText: {
     fontSize: 12,

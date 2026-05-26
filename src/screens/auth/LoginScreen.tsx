@@ -15,10 +15,12 @@ import type { RootStackParamList } from "../../navigation/RootNavigator";
 import { getUserBusinessContext } from "../../services/businessCloudService";
 import { isSupabaseConfigured, supabase } from "../../services/supabase";
 import { useAuthStore } from "../../store/authStore";
+import { useAppTheme } from "../../theme/useAppTheme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
 export function LoginScreen({ navigation }: Props) {
+  const { theme } = useAppTheme();
   const setSession = useAuthStore((state) => state.setSession);
 
   const [email, setEmail] = useState("");
@@ -137,16 +139,16 @@ export function LoginScreen({ navigation }: Props) {
 
   if (checkingSession) {
     return (
-      <SafeAreaView style={styles.screen}>
+      <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
         <View style={styles.centerBox}>
-          <Text style={styles.loadingText}>Checking session...</Text>
+          <Text style={[styles.loadingText, { color: theme.textSecondary }]}>Checking session...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.wrapper}>
           <AppHeader
@@ -156,7 +158,7 @@ export function LoginScreen({ navigation }: Props) {
           />
 
           <AppCard style={styles.card}>
-            <Text style={styles.cardTitle}>Login</Text>
+            <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Login</Text>
 
             <AppInput
               label="Email"
@@ -174,10 +176,10 @@ export function LoginScreen({ navigation }: Props) {
               secureTextEntry
             />
 
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            {error ? <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text> : null}
 
             {!isSupabaseConfigured ? (
-              <Text style={styles.warningText}>
+              <Text style={[styles.warningText, { backgroundColor: theme.warningSoft, borderColor: theme.warning, color: theme.warning }]}>
                 Supabase env values are missing. Add EXPO_PUBLIC_SUPABASE_URL
                 and EXPO_PUBLIC_SUPABASE_ANON_KEY in .env.
               </Text>
