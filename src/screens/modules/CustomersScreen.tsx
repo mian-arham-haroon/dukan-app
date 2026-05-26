@@ -264,12 +264,17 @@ export function CustomersScreen() {
 
           <AppCard style={styles.formCard}>
             <View style={styles.formTitleRow}>
-              <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>
-                {isEditing ? "Edit customer" : "Add customer"}
-              </Text>
+              <View style={styles.titleBlock}>
+                <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>
+                  {isEditing ? "Edit customer" : "Add customer"}
+                </Text>
+                <Text style={[styles.cardSubtitle, { color: theme.textSecondary }]}>
+                  Store contact details and opening credit information.
+                </Text>
+              </View>
 
               {isEditing ? (
-                <Pressable style={[styles.cancelEditButton, { backgroundColor: theme.cardMuted, borderColor: theme.border }]} onPress={resetForm}>
+                <Pressable style={[styles.cancelEditButton, { backgroundColor: theme.surfaceMuted, borderColor: theme.borderStrong }]} onPress={resetForm}>
                   <Text style={[styles.cancelEditButtonText, { color: theme.textPrimary }]}>Cancel edit</Text>
                 </Pressable>
               ) : null}
@@ -353,7 +358,14 @@ export function CustomersScreen() {
                 <AppCard key={customer.id} style={styles.customerCard}>
                   <View style={styles.customerTopRow}>
                     <View style={styles.customerInfo}>
-                      <Text style={[styles.customerName, { color: theme.textPrimary }]}>{customer.name}</Text>
+                      <View style={styles.nameRow}>
+                        <View style={[styles.itemInitial, { backgroundColor: theme.primarySoft }]}>
+                          <Text style={[styles.itemInitialText, { color: theme.primary }]}>
+                            {customer.name.charAt(0).toUpperCase()}
+                          </Text>
+                        </View>
+                        <Text style={[styles.customerName, { color: theme.textPrimary }]}>{customer.name}</Text>
+                      </View>
 
                       <Text style={[styles.customerMeta, { color: theme.textSecondary }]}>Phone: {customer.phone || "N/A"}</Text>
 
@@ -423,17 +435,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8FAFC",
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 36,
+    padding: 18,
+    paddingBottom: 38,
   },
   wrapper: {
     width: "100%",
-    maxWidth: 900,
+    maxWidth: 860,
     alignSelf: "center",
-    gap: 16,
+    gap: 18,
   },
   headerCard: {
-    borderRadius: 16,
+    borderRadius: 22,
   },
   summaryRow: {
     flexDirection: "row",
@@ -443,23 +455,19 @@ const styles = StyleSheet.create({
   summaryBox: {
     flex: 1,
     minWidth: 180,
-    backgroundColor: "#F8FAFC",
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
   },
   summaryLabel: {
     fontSize: 12,
-    color: "#64748B",
     marginBottom: 6,
-    fontWeight: "800",
+    fontWeight: "900",
     textTransform: "uppercase",
   },
   summaryValue: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: "900",
-    color: "#0F172A",
   },
   summaryHint: {
     fontSize: 12,
@@ -467,24 +475,30 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   formCard: {
-    borderRadius: 16,
+    borderRadius: 22,
   },
   formTitleRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "space-between",
     gap: 12,
-    marginBottom: 16,
+    marginBottom: 18,
+  },
+  titleBlock: {
+    flex: 1,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 21,
     fontWeight: "900",
-    color: "#0F172A",
+    marginBottom: 4,
+  },
+  cardSubtitle: {
+    fontSize: 13,
+    lineHeight: 19,
   },
   cancelEditButton: {
-    backgroundColor: "#E2E8F0",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 13,
+    paddingVertical: 9,
     borderRadius: 999,
     borderWidth: 1,
   },
@@ -504,12 +518,11 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 13,
-    color: "#DC2626",
     marginBottom: 14,
     fontWeight: "700",
   },
   listSection: {
-    gap: 12,
+    gap: 14,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -520,10 +533,9 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontWeight: "900",
-    color: "#0F172A",
   },
   customerCard: {
-    borderRadius: 16,
+    borderRadius: 22,
   },
   customerTopRow: {
     flexDirection: "row",
@@ -535,16 +547,33 @@ const styles = StyleSheet.create({
   customerInfo: {
     flex: 1,
   },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 10,
+    marginBottom: 8,
+  },
+  itemInitial: {
+    width: 38,
+    height: 38,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  itemInitialText: {
+    fontSize: 16,
+    fontWeight: "900",
+  },
   customerName: {
     fontSize: 18,
     fontWeight: "900",
-    color: "#0F172A",
-    marginBottom: 4,
+    flexShrink: 1,
   },
   customerMeta: {
     fontSize: 13,
-    color: "#64748B",
-    marginBottom: 3,
+    marginBottom: 4,
+    lineHeight: 19,
   },
   actionRow: {
     flexDirection: "row",
@@ -552,26 +581,22 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   editButton: {
-    backgroundColor: "#DBEAFE",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 13,
+    paddingVertical: 9,
     borderRadius: 999,
     borderWidth: 1,
   },
   editButtonText: {
-    color: "#1D4ED8",
     fontSize: 12,
     fontWeight: "800",
   },
   deleteButton: {
-    backgroundColor: "#FEE2E2",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 13,
+    paddingVertical: 9,
     borderRadius: 999,
     borderWidth: 1,
   },
   deleteButtonText: {
-    color: "#B91C1C",
     fontSize: 12,
     fontWeight: "800",
   },
@@ -586,19 +611,17 @@ const styles = StyleSheet.create({
   customerStat: {
     flex: 1,
     minWidth: 120,
-    backgroundColor: "#F8FAFC",
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: 16,
+    padding: 14,
     borderWidth: 1,
   },
   statLabel: {
     fontSize: 12,
-    color: "#64748B",
-    marginBottom: 4,
+    marginBottom: 6,
+    fontWeight: "800",
   },
   statValue: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "900",
-    color: "#0F172A",
   },
 });
