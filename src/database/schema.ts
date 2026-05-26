@@ -1,0 +1,212 @@
+export const CREATE_TABLES_SQL: string[] = [
+  `CREATE TABLE IF NOT EXISTS businesses (
+    id TEXT PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL,
+    owner_name TEXT,
+    phone TEXT,
+    currency TEXT NOT NULL DEFAULT 'PKR',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    sync_status TEXT NOT NULL DEFAULT 'pending',
+    is_deleted INTEGER NOT NULL DEFAULT 0
+  );`,
+
+  `CREATE TABLE IF NOT EXISTS stores (
+    id TEXT PRIMARY KEY NOT NULL,
+    business_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    address TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    sync_status TEXT NOT NULL DEFAULT 'pending',
+    is_deleted INTEGER NOT NULL DEFAULT 0
+  );`,
+
+  `CREATE TABLE IF NOT EXISTS products (
+    id TEXT PRIMARY KEY NOT NULL,
+    business_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    sku TEXT,
+    barcode TEXT,
+    category TEXT NOT NULL DEFAULT 'general',
+    unit TEXT NOT NULL DEFAULT 'pcs',
+    cost_price REAL NOT NULL DEFAULT 0,
+    selling_price REAL NOT NULL DEFAULT 0,
+    stock_quantity INTEGER NOT NULL DEFAULT 0,
+    low_stock_threshold INTEGER NOT NULL DEFAULT 5,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    sync_status TEXT NOT NULL DEFAULT 'pending',
+    is_deleted INTEGER NOT NULL DEFAULT 0
+  );`,
+
+  `CREATE TABLE IF NOT EXISTS customers (
+    id TEXT PRIMARY KEY NOT NULL,
+    business_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    phone TEXT,
+    address TEXT,
+    opening_balance REAL NOT NULL DEFAULT 0,
+    current_balance REAL NOT NULL DEFAULT 0,
+    credit_limit REAL NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    sync_status TEXT NOT NULL DEFAULT 'pending',
+    is_deleted INTEGER NOT NULL DEFAULT 0
+  );`,
+
+  `CREATE TABLE IF NOT EXISTS suppliers (
+    id TEXT PRIMARY KEY NOT NULL,
+    business_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    phone TEXT,
+    address TEXT,
+    opening_balance REAL NOT NULL DEFAULT 0,
+    current_balance REAL NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    sync_status TEXT NOT NULL DEFAULT 'pending',
+    is_deleted INTEGER NOT NULL DEFAULT 0
+  );`,
+
+  `CREATE TABLE IF NOT EXISTS invoices (
+    id TEXT PRIMARY KEY NOT NULL,
+    business_id TEXT NOT NULL,
+    store_id TEXT,
+    customer_id TEXT,
+    invoice_no TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'draft',
+    payment_status TEXT NOT NULL DEFAULT 'unpaid',
+    subtotal REAL NOT NULL DEFAULT 0,
+    discount_total REAL NOT NULL DEFAULT 0,
+    tax_total REAL NOT NULL DEFAULT 0,
+    grand_total REAL NOT NULL DEFAULT 0,
+    paid_amount REAL NOT NULL DEFAULT 0,
+    balance_due REAL NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    sync_status TEXT NOT NULL DEFAULT 'pending',
+    is_deleted INTEGER NOT NULL DEFAULT 0
+  );`,
+
+  `CREATE TABLE IF NOT EXISTS invoice_items (
+    id TEXT PRIMARY KEY NOT NULL,
+    invoice_id TEXT NOT NULL,
+    product_id TEXT,
+    product_name_snapshot TEXT NOT NULL,
+    quantity REAL NOT NULL DEFAULT 0,
+    unit_price REAL NOT NULL DEFAULT 0,
+    cost_price REAL NOT NULL DEFAULT 0,
+    discount_amount REAL NOT NULL DEFAULT 0,
+    line_total REAL NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    sync_status TEXT NOT NULL DEFAULT 'pending',
+    is_deleted INTEGER NOT NULL DEFAULT 0
+  );`,
+
+  `CREATE TABLE IF NOT EXISTS invoice_returns (
+    id TEXT PRIMARY KEY NOT NULL,
+    business_id TEXT NOT NULL,
+    store_id TEXT NOT NULL,
+    invoice_id TEXT NOT NULL,
+    invoice_item_local_id TEXT,
+    product_id TEXT,
+    product_name TEXT NOT NULL,
+    quantity REAL NOT NULL DEFAULT 0,
+    unit_price REAL NOT NULL DEFAULT 0,
+    line_total REAL NOT NULL DEFAULT 0,
+    balance_reduced REAL NOT NULL DEFAULT 0,
+    cash_refund REAL NOT NULL DEFAULT 0,
+    note TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    sync_status TEXT NOT NULL DEFAULT 'pending',
+    is_deleted INTEGER NOT NULL DEFAULT 0
+  );`,
+
+  `CREATE TABLE IF NOT EXISTS payments (
+    id TEXT PRIMARY KEY NOT NULL,
+    business_id TEXT NOT NULL,
+    invoice_id TEXT,
+    customer_id TEXT,
+    amount REAL NOT NULL DEFAULT 0,
+    method TEXT NOT NULL DEFAULT 'cash',
+    direction TEXT NOT NULL DEFAULT 'in',
+    paid_at TEXT NOT NULL DEFAULT (datetime('now')),
+    note TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    sync_status TEXT NOT NULL DEFAULT 'pending',
+    is_deleted INTEGER NOT NULL DEFAULT 0
+  );`,
+
+  `CREATE TABLE IF NOT EXISTS expenses (
+    id TEXT PRIMARY KEY NOT NULL,
+    business_id TEXT NOT NULL,
+    store_id TEXT,
+    title TEXT NOT NULL,
+    category TEXT NOT NULL DEFAULT 'general',
+    amount REAL NOT NULL DEFAULT 0,
+    payment_method TEXT NOT NULL DEFAULT 'cash',
+    expense_at TEXT NOT NULL DEFAULT (datetime('now')),
+    note TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    sync_status TEXT NOT NULL DEFAULT 'pending',
+    is_deleted INTEGER NOT NULL DEFAULT 0
+  );`,
+
+  `CREATE TABLE IF NOT EXISTS cashbook_entries (
+    id TEXT PRIMARY KEY NOT NULL,
+    business_id TEXT NOT NULL,
+    store_id TEXT,
+    entry_type TEXT NOT NULL,
+    amount_in REAL NOT NULL DEFAULT 0,
+    amount_out REAL NOT NULL DEFAULT 0,
+    description TEXT,
+    ref_type TEXT,
+    ref_id TEXT,
+    entry_at TEXT NOT NULL DEFAULT (datetime('now')),
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    sync_status TEXT NOT NULL DEFAULT 'pending',
+    is_deleted INTEGER NOT NULL DEFAULT 0
+  );`,
+
+  `CREATE TABLE IF NOT EXISTS stock_movements (
+    id TEXT PRIMARY KEY NOT NULL,
+    business_id TEXT NOT NULL,
+    store_id TEXT,
+    product_id TEXT NOT NULL,
+    movement_type TEXT NOT NULL,
+    qty_delta REAL NOT NULL DEFAULT 0,
+    previous_qty REAL NOT NULL DEFAULT 0,
+    new_qty REAL NOT NULL DEFAULT 0,
+    ref_type TEXT,
+    ref_id TEXT,
+    occurred_at TEXT NOT NULL DEFAULT (datetime('now')),
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    sync_status TEXT NOT NULL DEFAULT 'pending',
+    is_deleted INTEGER NOT NULL DEFAULT 0
+  );`,
+
+  `CREATE TABLE IF NOT EXISTS sync_queue (
+    id TEXT PRIMARY KEY NOT NULL,
+    table_name TEXT NOT NULL,
+    record_id TEXT NOT NULL,
+    operation TEXT NOT NULL,
+    payload_json TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    attempts INTEGER NOT NULL DEFAULT 0,
+    last_error TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );`,
+
+  `CREATE INDEX IF NOT EXISTS idx_products_business_id ON products(business_id);`,
+  `CREATE INDEX IF NOT EXISTS idx_customers_business_id ON customers(business_id);`,
+  `CREATE INDEX IF NOT EXISTS idx_invoices_business_id ON invoices(business_id);`,
+  `CREATE INDEX IF NOT EXISTS idx_sync_queue_status ON sync_queue(status);`,
+];
