@@ -1,7 +1,8 @@
 import { ReportsScreen } from "../screens/modules/ReportsScreen";
 import React from "react";
-import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useAppTheme } from "../theme/useAppTheme";
 
 import { LoginScreen } from "../screens/auth/LoginScreen";
 import { SignupScreen } from "../screens/auth/SignupScreen";
@@ -46,33 +47,36 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-const AppTheme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    background: "#F8FAFC",
-    card: "#FFFFFF",
-    text: "#0F172A",
-    border: "#E2E8F0",
-    primary: "#2563EB",
-  },
-};
-
 export function RootNavigator() {
+  const { theme, mode } = useAppTheme();
+
+  const navigationTheme = {
+    ...(mode === "dark" ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(mode === "dark" ? DarkTheme.colors : DefaultTheme.colors),
+      background: theme.background,
+      card: theme.surface,
+      text: theme.textPrimary,
+      border: theme.border,
+      primary: theme.primary,
+    },
+  };
+
   return (
-    <NavigationContainer theme={AppTheme}>
+    <NavigationContainer theme={navigationTheme}>
       <Stack.Navigator
         initialRouteName="Login"
         screenOptions={{
           headerStyle: {
-            backgroundColor: "#FFFFFF",
+            backgroundColor: theme.surface,
           },
-          headerTintColor: "#0F172A",
+          headerTintColor: theme.textPrimary,
           headerTitleStyle: {
             fontWeight: "700",
+            color: theme.textPrimary,
           },
           contentStyle: {
-            backgroundColor: "#F8FAFC",
+            backgroundColor: theme.background,
           },
         }}
       >

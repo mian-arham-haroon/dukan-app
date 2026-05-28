@@ -15,10 +15,12 @@ import type { RootStackParamList } from "../../navigation/RootNavigator";
 import { getUserBusinessContext } from "../../services/businessCloudService";
 import { isSupabaseConfigured, supabase } from "../../services/supabase";
 import { useAuthStore } from "../../store/authStore";
+import { useAppTheme } from "../../theme/useAppTheme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
 export function LoginScreen({ navigation }: Props) {
+  const { theme } = useAppTheme();
   const setSession = useAuthStore((state) => state.setSession);
 
   const [email, setEmail] = useState("");
@@ -137,26 +139,37 @@ export function LoginScreen({ navigation }: Props) {
 
   if (checkingSession) {
     return (
-      <SafeAreaView style={styles.screen}>
+      <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
         <View style={styles.centerBox}>
-          <Text style={styles.loadingText}>Checking session...</Text>
+          <Text style={[styles.loadingText, { color: theme.textSecondary }]}>Checking session...</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.wrapper}>
-          <AppHeader
-            eyebrow="Offline first small business app"
-            title="Dukan App"
-            subtitle="Login with Supabase Auth. Business and store setup comes before cloud sync."
-          />
+          <View style={styles.hero}>
+            <View style={[styles.brandMark, { backgroundColor: theme.primarySoft }]}>
+              <Text style={[styles.brandMarkText, { color: theme.primary }]}>D</Text>
+            </View>
+
+            <AppHeader
+              eyebrow="Offline first small business app"
+              title="Dukan App"
+              subtitle="Login with Supabase Auth. Business and store setup comes before cloud sync."
+            />
+          </View>
 
           <AppCard style={styles.card}>
-            <Text style={styles.cardTitle}>Login</Text>
+            <View style={styles.cardHeader}>
+              <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Login</Text>
+              <Text style={[styles.cardSubtitle, { color: theme.textSecondary }]}>
+                Continue to your shop workspace.
+              </Text>
+            </View>
 
             <AppInput
               label="Email"
@@ -174,10 +187,10 @@ export function LoginScreen({ navigation }: Props) {
               secureTextEntry
             />
 
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            {error ? <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text> : null}
 
             {!isSupabaseConfigured ? (
-              <Text style={styles.warningText}>
+              <Text style={[styles.warningText, { backgroundColor: theme.warningSoft, borderColor: theme.warning, color: theme.warning }]}>
                 Supabase env values are missing. Add EXPO_PUBLIC_SUPABASE_URL
                 and EXPO_PUBLIC_SUPABASE_ANON_KEY in .env.
               </Text>
@@ -222,35 +235,53 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    padding: 20,
+    padding: 22,
     justifyContent: "center",
   },
   wrapper: {
     width: "100%",
-    maxWidth: 440,
+    maxWidth: 460,
     alignSelf: "center",
   },
+  hero: {
+    marginBottom: 6,
+  },
+  brandMark: {
+    width: 58,
+    height: 58,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 18,
+  },
+  brandMarkText: {
+    fontSize: 28,
+    fontWeight: "900",
+  },
   card: {
-    marginTop: 18,
+    marginTop: 14,
+    gap: 2,
+  },
+  cardHeader: {
+    marginBottom: 18,
   },
   cardTitle: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "900",
-    color: "#0F172A",
-    marginBottom: 16,
+    marginBottom: 6,
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    lineHeight: 21,
   },
   errorText: {
-    color: "#DC2626",
     fontSize: 13,
     fontWeight: "700",
     marginBottom: 14,
   },
   warningText: {
-    color: "#92400E",
-    backgroundColor: "#FFFBEB",
-    borderColor: "#FDE68A",
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 12,
     fontSize: 13,
     fontWeight: "700",
@@ -268,6 +299,5 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#64748B",
   },
 });

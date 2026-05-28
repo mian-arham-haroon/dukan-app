@@ -1,8 +1,6 @@
 import React from "react";
 import {
   Pressable,
-  SafeAreaView,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -10,11 +8,15 @@ import {
 } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
+import { AppButton } from "../../components/AppButton";
+import { AppScreen } from "../../components/AppScreen";
+import { AppText } from "../../components/AppText";
+import { AppCard } from "../../components/ui";
 import type {
   ModuleRouteName,
   RootStackParamList,
 } from "../../navigation/RootNavigator";
-import { AppButton } from "../../components/AppButton";
+import { useAppTheme } from "../../theme/useAppTheme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Dashboard">;
 
@@ -22,40 +24,54 @@ const modules: Array<{
   title: string;
   route: ModuleRouteName;
   description: string;
+  accent: "primary" | "success" | "warning" | "danger";
 }> = [
   {
     title: "Products",
     route: "Products",
     description: "Manage items, prices, stock, SKU, and low-stock alerts.",
+    accent: "primary",
   },
   {
     title: "Customers",
     route: "Customers",
     description: "Manage customers, phone numbers, balance, and credit.",
+    accent: "success",
   },
   {
     title: "Invoices",
     route: "Invoices",
     description: "Create sales invoices, receipts, and unpaid bills.",
+    accent: "warning",
   },
   {
     title: "Udhaar",
     route: "Udhaar",
     description: "Track customer debt, partial payments, and ledgers.",
+    accent: "danger",
   },
   {
     title: "Expenses",
     route: "Expenses",
     description: "Record shop expenses and cash-out entries.",
+    accent: "warning",
   },
   {
     title: "Settings",
     route: "Settings",
     description: "Business profile, store setup, currency, and sync status.",
+    accent: "primary",
   },
 ];
 
+const stats = [
+  { label: "Today Sales", value: "Rs 0", helper: "Current day", accent: "primary" },
+  { label: "Customer Udhaar", value: "Rs 0", helper: "Outstanding", accent: "success" },
+  { label: "Low Stock Items", value: "0", helper: "Needs review", accent: "warning" },
+];
+
 export function DashboardScreen({ navigation }: Props) {
+  const { theme } = useAppTheme();
   const { width } = useWindowDimensions();
 
   const isWide = width >= 900;
@@ -65,189 +81,239 @@ export function DashboardScreen({ navigation }: Props) {
   const moduleWidth = isWide ? "48.5%" : "100%";
 
   return (
-    <SafeAreaView style={styles.screen}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.wrapper}>
-          <View style={styles.heroCard}>
-            <Text style={styles.heroEyebrow}>Business overview</Text>
-            <Text style={styles.heroTitle}>Dashboard</Text>
-            <Text style={styles.heroSubtitle}>
-              A clean starting point for your invoicing, inventory, udhaar, and
-              business reports app.
-            </Text>
-          </View>
-
-          <View style={styles.statsRow}>
-            <View style={[styles.statCard, { width: cardWidth }]}>
-              <Text style={styles.statLabel}>Today Sales</Text>
-              <Text style={styles.statValue}>Rs 0</Text>
-            </View>
-
-            <View style={[styles.statCard, { width: cardWidth }]}>
-              <Text style={styles.statLabel}>Customer Udhaar</Text>
-              <Text style={styles.statValue}>Rs 0</Text>
-            </View>
-
-            <View style={[styles.statCard, { width: cardWidth }]}>
-              <Text style={styles.statLabel}>Low Stock Items</Text>
-              <Text style={styles.statValue}>0</Text>
+    <AppScreen contentStyle={styles.scrollContent}>
+      <View style={styles.wrapper}>
+        <AppCard style={styles.heroCard}>
+          <View style={styles.heroTopRow}>
+            <View style={[styles.heroBadge, { backgroundColor: theme.primarySoft }]}>
+              <AppText variant="label" style={{ color: theme.primary }}>
+                Business overview
+              </AppText>
             </View>
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Main Modules</Text>
-            <Text style={styles.sectionSubtitle}>
-              Open each module. Real SQLite data will be connected in later
-              phases.
-            </Text>
+          <AppText variant="title" style={styles.heroTitle}>
+            Dashboard
+          </AppText>
 
-            <View style={styles.moduleGrid}>
-              {modules.map((item) => (
-                <Pressable
-                  key={item.route}
-                  onPress={() => navigation.navigate(item.route)}
-                  style={({ pressed }) => [
-                    styles.moduleCard,
-                    { width: moduleWidth },
-                    pressed && styles.pressed,
-                  ]}
-                >
-                  <View>
-                    <Text style={styles.moduleTitle}>{item.title}</Text>
-                    <Text style={styles.moduleDescription}>
-                      {item.description}
+          <AppText tone="secondary" style={styles.heroSubtitle}>
+            A clean starting point for your invoicing, inventory, udhaar, and
+            business reports app.
+          </AppText>
+
+          <View style={styles.heroActions}>
+            <AppButton
+              title="Reports"
+              onPress={() => navigation.navigate("Reports")}
+              style={styles.heroButton}
+            />
+
+            <AppButton
+              title="Back to Login"
+              variant="secondary"
+              onPress={() => navigation.navigate("Login")}
+              style={styles.heroButton}
+            />
+          </View>
+        </AppCard>
+
+        <View style={styles.statsRow}>
+          {stats.map((stat) => {
+            const accentColor =
+              stat.accent === "success"
+                ? theme.success
+                : stat.accent === "warning"
+                ? theme.warning
+                : theme.primary;
+
+            return (
+              <AppCard
+                key={stat.label}
+                variant="muted"
+                style={[styles.statCard, { width: cardWidth }]}
+              >
+                <View style={[styles.statAccent, { backgroundColor: accentColor }]} />
+                <AppText variant="label" tone="muted">
+                  {stat.label}
+                </AppText>
+                <AppText variant="title" style={styles.statValue}>
+                  {stat.value}
+                </AppText>
+                <AppText variant="caption" tone="secondary">
+                  {stat.helper}
+                </AppText>
+              </AppCard>
+            );
+          })}
+        </View>
+
+        <View style={styles.sectionHeader}>
+          <AppText variant="title" style={styles.sectionTitle}>
+            Main Modules
+          </AppText>
+          <AppText tone="secondary" style={styles.sectionSubtitle}>
+            Open each module. Real SQLite data will be connected in later
+            phases.
+          </AppText>
+        </View>
+
+        <View style={styles.moduleGrid}>
+          {modules.map((item) => {
+            const accentColor =
+              item.accent === "success"
+                ? theme.success
+                : item.accent === "warning"
+                ? theme.warning
+                : item.accent === "danger"
+                ? theme.danger
+                : theme.primary;
+
+            return (
+              <Pressable
+                key={item.route}
+                onPress={() => navigation.navigate(item.route)}
+                style={({ pressed }) => [
+                  styles.moduleCard,
+                  {
+                    width: moduleWidth,
+                    backgroundColor: theme.card,
+                    borderColor: theme.borderStrong,
+                    shadowColor: theme.shadow,
+                  },
+                  pressed && styles.pressed,
+                ]}
+              >
+                <View style={styles.moduleContent}>
+                  <View
+                    style={[
+                      styles.moduleAccent,
+                      { backgroundColor: accentColor + "24" },
+                    ]}
+                  >
+                    <Text style={[styles.moduleInitial, { color: accentColor }]}>
+                      {item.title.charAt(0)}
                     </Text>
                   </View>
 
-                  <Text style={styles.moduleArrow}>→</Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
+                  <View style={styles.moduleTextBox}>
+                    <Text
+                      style={[
+                        styles.moduleTitle,
+                        { color: theme.textPrimary },
+                      ]}
+                    >
+                      {item.title}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.moduleDescription,
+                        { color: theme.textSecondary },
+                      ]}
+                    >
+                      {item.description}
+                    </Text>
+                  </View>
+                </View>
 
-          <AppButton
-            title="Reports"
-            onPress={() => navigation.navigate("Reports")}
-            style={styles.backButton}
-          />
-
-          <AppButton
-            title="Back to Login"
-            variant="secondary"
-            onPress={() => navigation.navigate("Login")}
-            style={styles.backButton}
-          />
+                <Text style={[styles.moduleArrow, { color: theme.textSecondary }]}>
+                  &gt;
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
-      </ScrollView>
-    </SafeAreaView>
+      </View>
+    </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: "#F8FAFC",
-  },
   scrollContent: {
-    padding: 20,
+    padding: 18,
+    paddingBottom: 36,
   },
   wrapper: {
     width: "100%",
-    maxWidth: 1100,
+    maxWidth: 960,
     alignSelf: "center",
+    gap: 16,
   },
   heroCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    marginBottom: 18,
-    shadowColor: "#000000",
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2,
+    padding: 22,
   },
-  heroEyebrow: {
-    fontSize: 12,
-    fontWeight: "800",
-    color: "#2563EB",
-    marginBottom: 8,
-    textTransform: "uppercase",
+  heroTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  heroBadge: {
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
   },
   heroTitle: {
-    fontSize: 32,
-    fontWeight: "800",
-    color: "#0F172A",
-    marginBottom: 8,
+    fontSize: 34,
+    lineHeight: 41,
   },
   heroSubtitle: {
-    fontSize: 15,
-    lineHeight: 24,
-    color: "#64748B",
+    maxWidth: 620,
+    marginTop: 8,
+  },
+  heroActions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginTop: 22,
+  },
+  heroButton: {
+    minWidth: 170,
+    flexGrow: 1,
   },
   statsRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    marginBottom: 24,
+    gap: 12,
   },
   statCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 18,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    marginBottom: 14,
-    shadowColor: "#000000",
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 1,
+    minHeight: 132,
+    justifyContent: "space-between",
+    overflow: "hidden",
   },
-  statLabel: {
-    fontSize: 14,
-    color: "#64748B",
-    marginBottom: 10,
+  statAccent: {
+    width: 38,
+    height: 4,
+    borderRadius: 999,
+    marginBottom: 12,
   },
   statValue: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: 29,
+    lineHeight: 37,
+    marginTop: 8,
   },
-  section: {
-    marginBottom: 18,
+  sectionHeader: {
+    gap: 4,
   },
   sectionTitle: {
     fontSize: 22,
-    fontWeight: "800",
-    color: "#0F172A",
-    marginBottom: 6,
   },
   sectionSubtitle: {
-    fontSize: 14,
-    lineHeight: 22,
-    color: "#64748B",
-    marginBottom: 16,
+    maxWidth: 680,
   },
   moduleGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
+    gap: 13,
   },
   moduleCard: {
-    minHeight: 108,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 18,
+    minHeight: 122,
+    borderRadius: 20,
     padding: 18,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    marginBottom: 14,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    shadowColor: "#000000",
     shadowOpacity: 0.04,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 3 },
@@ -256,25 +322,39 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.88,
   },
+  moduleContent: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
+  moduleAccent: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  moduleInitial: {
+    fontSize: 20,
+    fontWeight: "900",
+  },
+  moduleTextBox: {
+    flex: 1,
+  },
   moduleTitle: {
     fontSize: 18,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontWeight: "900",
     marginBottom: 8,
   },
   moduleDescription: {
     maxWidth: 380,
     fontSize: 14,
     lineHeight: 21,
-    color: "#64748B",
   },
   moduleArrow: {
-    fontSize: 24,
-    fontWeight: "800",
-    color: "#2563EB",
+    fontSize: 22,
+    fontWeight: "900",
     marginLeft: 12,
-  },
-  backButton: {
-    marginTop: 6,
   },
 });

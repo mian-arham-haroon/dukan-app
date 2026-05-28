@@ -1,8 +1,10 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { AppButton } from "../components/AppButton";
+import { AppCard } from "../components/ui/AppCard";
+import { AppHeader } from "../components/ui/AppHeader";
 import { Screen } from "../components/Screen";
-import { colors, radius, spacing } from "../constants/theme";
+import { useAppTheme } from "../theme/useAppTheme";
 
 type Props = {
   navigation: {
@@ -10,33 +12,36 @@ type Props = {
   };
 };
 
-function StatCard({
-  label,
-  value,
-  helper,
-}: {
+type StatCardProps = {
   label: string;
   value: string;
   helper: string;
-}) {
+};
+
+function StatCard({ label, value, helper }: StatCardProps) {
+  const { theme } = useAppTheme();
+
   return (
-    <View style={styles.statCard}>
-      <Text style={styles.statLabel}>{label}</Text>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statHelper}>{helper}</Text>
-    </View>
+    <AppCard style={styles.statCard}>
+      <Text style={[styles.statLabel, { color: theme.textSecondary }]}>{label}</Text>
+      <Text style={[styles.statValue, { color: theme.textPrimary }]}>{value}</Text>
+      <Text style={[styles.statHelper, { color: theme.textMuted }]}>{helper}</Text>
+    </AppCard>
   );
 }
 
 export function DashboardScreen({ navigation }: Props) {
+  const { theme } = useAppTheme();
+
   return (
     <Screen>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Dashboard</Text>
-          <Text style={styles.subtitle}>Today&apos;s business overview</Text>
-        </View>
-      </View>
+      <AppCard style={styles.headerCard}>
+        <AppHeader
+          eyebrow="Overview"
+          title="Dashboard"
+          subtitle="Today’s business overview"
+        />
+      </AppCard>
 
       <View style={styles.grid}>
         <StatCard label="Today Sales" value="Rs 0" helper="No invoices yet" />
@@ -45,88 +50,93 @@ export function DashboardScreen({ navigation }: Props) {
         <StatCard label="Cash in Hand" value="Rs 0" helper="Cashbook empty" />
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Quick Actions</Text>
+      <AppCard style={styles.modulesCard}>
+        <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Modules</Text>
 
-        <AppButton title="Create Invoice" onPress={() => {}} />
-        <AppButton title="Add Product" variant="secondary" onPress={() => {}} />
-        <AppButton title="Add Customer" variant="secondary" onPress={() => {}} />
+        <View style={styles.buttonGrid}>
+          <View style={styles.buttonCell}>
+            <AppButton title="Products" variant="secondary" onPress={() => navigation.navigate("Products")} />
+          </View>
+          <View style={styles.buttonCell}>
+            <AppButton title="Customers" variant="secondary" onPress={() => navigation.navigate("Customers")} />
+          </View>
+          <View style={styles.buttonCell}>
+            <AppButton title="Invoices" variant="secondary" onPress={() => navigation.navigate("Invoices")} />
+          </View>
+          <View style={styles.buttonCell}>
+            <AppButton title="Udhaar" variant="secondary" onPress={() => navigation.navigate("Udhaar")} />
+          </View>
+          <View style={styles.buttonCell}>
+            <AppButton title="Expenses" variant="secondary" onPress={() => navigation.navigate("Expenses")} />
+          </View>
+          <View style={styles.buttonCell}>
+            <AppButton title="Settings" variant="secondary" onPress={() => navigation.navigate("Settings")} />
+          </View>
+        </View>
+      </AppCard>
+
+      <View style={styles.actionRow}>
+        <AppButton title="Reports" variant="primary" onPress={() => navigation.navigate("Reports")} style={styles.actionButton} />
+        <AppButton title="Back to Login" variant="secondary" onPress={() => navigation.navigate("Login")} style={styles.actionButton} />
       </View>
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Next Build Steps</Text>
-        <Text style={styles.listItem}>1. Add products screen</Text>
-        <Text style={styles.listItem}>2. Add customers screen</Text>
-        <Text style={styles.listItem}>3. Add local SQLite database</Text>
-        <Text style={styles.listItem}>4. Save real data offline</Text>
-      </View>
-
-      <AppButton
-        title="Back to Login"
-        variant="secondary"
-        onPress={() => navigation.navigate("Login")}
-      />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
-    marginBottom: spacing.lg,
-  },
-  title: {
-    color: colors.text,
-    fontSize: 32,
-    fontWeight: "900",
-  },
-  subtitle: {
-    color: colors.textMuted,
-    fontSize: 15,
-    marginTop: 4,
+  headerCard: {
+    marginBottom: 20,
   },
   grid: {
-    marginBottom: spacing.md,
+    marginBottom: 20,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
   statCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: spacing.md,
+    width: "48%",
+    marginBottom: 16,
   },
   statLabel: {
-    color: colors.textMuted,
-    fontSize: 14,
+    fontSize: 13,
     marginBottom: 8,
   },
   statValue: {
-    color: colors.text,
     fontSize: 28,
     fontWeight: "900",
-    marginBottom: 4,
+    marginBottom: 6,
   },
   statHelper: {
-    color: colors.textMuted,
     fontSize: 13,
+    lineHeight: 20,
   },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginBottom: spacing.md,
+  modulesCard: {
+    marginBottom: 20,
   },
   cardTitle: {
-    color: colors.text,
-    fontSize: 21,
+    fontSize: 20,
     fontWeight: "900",
-    marginBottom: spacing.md,
+    marginBottom: 16,
   },
-  listItem: {
-    color: colors.textMuted,
-    fontSize: 15,
-    marginBottom: 8,
+  buttonGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginHorizontal: -6,
+  },
+  buttonCell: {
+    width: "48%",
+    marginBottom: 12,
+    paddingHorizontal: 6,
+  },
+  actionRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  actionButton: {
+    flex: 1,
+    minWidth: 160,
   },
 });

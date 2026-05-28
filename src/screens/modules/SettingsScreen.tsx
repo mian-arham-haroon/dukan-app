@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
+import { useAppTheme } from "../../theme/useAppTheme";
+
 import { AppButton } from "../../components/AppButton";
 import { AppCard, AppHeader, LoadingState } from "../../components/ui";
 import type { RootStackParamList } from "../../navigation/RootNavigator";
@@ -72,6 +74,7 @@ function confirmDangerAction(title: string, message: string): Promise<boolean> {
 export function SettingsScreen({ navigation }: Props) {
   const user = useAuthStore((state) => state.user);
   const clearSession = useAuthStore((state) => state.clearSession);
+  const { theme, mode, setThemeMode } = useAppTheme();
 
   const [context, setContext] = useState<CloudBusinessContext | null>(null);
 
@@ -553,7 +556,7 @@ export function SettingsScreen({ navigation }: Props) {
   const store = context?.store ?? null;
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.wrapper}>
           <AppCard style={styles.headerCard}>
@@ -564,62 +567,74 @@ export function SettingsScreen({ navigation }: Props) {
             />
           </AppCard>
 
+          {error ? (
+            <View style={[styles.messageBox, { backgroundColor: theme.dangerSoft, borderColor: theme.danger }]}>
+              <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text>
+            </View>
+          ) : null}
+
+          {successMessage ? (
+            <View style={[styles.messageBox, { backgroundColor: theme.successSoft, borderColor: theme.success }]}>
+              <Text style={[styles.successText, { color: theme.success }]}>{successMessage}</Text>
+            </View>
+          ) : null}
+
           <AppCard style={styles.sectionCard}>
-            <Text style={styles.cardTitle}>Account</Text>
+            <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Account</Text>
 
-            <View style={styles.infoBox}>
-              <Text style={styles.label}>User ID</Text>
-              <Text style={styles.value}>{user?.id ?? "Not logged in"}</Text>
+            <View style={[styles.infoBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>User ID</Text>
+              <Text style={[styles.value, { color: theme.textPrimary }]}>{user?.id ?? "Not logged in"}</Text>
             </View>
 
-            <View style={styles.infoBox}>
-              <Text style={styles.label}>Email</Text>
-              <Text style={styles.value}>{user?.email ?? "N/A"}</Text>
+            <View style={[styles.infoBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Email</Text>
+              <Text style={[styles.value, { color: theme.textPrimary }]}>{user?.email ?? "N/A"}</Text>
             </View>
 
-            <View style={styles.infoBox}>
-              <Text style={styles.label}>Role</Text>
-              <Text style={styles.value}>{context?.role ?? "N/A"}</Text>
+            <View style={[styles.infoBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Role</Text>
+              <Text style={[styles.value, { color: theme.textPrimary }]}>{context?.role ?? "N/A"}</Text>
             </View>
           </AppCard>
 
           <AppCard style={styles.sectionCard}>
-            <Text style={styles.cardTitle}>Cloud business</Text>
+            <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Cloud business</Text>
 
             {business ? (
               <>
-                <View style={styles.statusBoxGood}>
-                  <Text style={styles.statusTitle}>Cloud setup complete</Text>
-                  <Text style={styles.statusText}>
+                <View style={[styles.statusBoxGood, { backgroundColor: theme.successSoft, borderColor: theme.success }]}>
+                  <Text style={[styles.statusTitle, { color: theme.success }]}>Cloud setup complete</Text>
+                  <Text style={[styles.statusText, { color: theme.success }]}>
                     This account has a business and store connected in Supabase.
                   </Text>
                 </View>
 
-                <View style={styles.infoBox}>
-                  <Text style={styles.label}>Business name</Text>
-                  <Text style={styles.value}>{business.name}</Text>
+                <View style={[styles.infoBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                  <Text style={[styles.label, { color: theme.textSecondary }]}>Business name</Text>
+                  <Text style={[styles.value, { color: theme.textPrimary }]}>{business.name}</Text>
                 </View>
 
-                <View style={styles.infoBox}>
-                  <Text style={styles.label}>Business ID</Text>
-                  <Text style={styles.value}>{business.id}</Text>
+                <View style={[styles.infoBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                  <Text style={[styles.label, { color: theme.textSecondary }]}>Business ID</Text>
+                  <Text style={[styles.value, { color: theme.textPrimary }]}>{business.id}</Text>
                 </View>
 
-                <View style={styles.infoBox}>
-                  <Text style={styles.label}>Currency</Text>
-                  <Text style={styles.value}>{business.currency}</Text>
+                <View style={[styles.infoBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                  <Text style={[styles.label, { color: theme.textSecondary }]}>Currency</Text>
+                  <Text style={[styles.value, { color: theme.textPrimary }]}>{business.currency}</Text>
                 </View>
 
-                <View style={styles.infoBox}>
-                  <Text style={styles.label}>Country</Text>
-                  <Text style={styles.value}>{business.country}</Text>
+                <View style={[styles.infoBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                  <Text style={[styles.label, { color: theme.textSecondary }]}>Country</Text>
+                  <Text style={[styles.value, { color: theme.textPrimary }]}>{business.country}</Text>
                 </View>
               </>
             ) : (
               <>
-                <View style={styles.statusBoxBad}>
-                  <Text style={styles.statusTitleBad}>Cloud setup missing</Text>
-                  <Text style={styles.statusTextBad}>
+                <View style={[styles.statusBoxBad, { backgroundColor: theme.dangerSoft, borderColor: theme.danger }]}>
+                  <Text style={[styles.statusTitleBad, { color: theme.danger }]}>Cloud setup missing</Text>
+                  <Text style={[styles.statusTextBad, { color: theme.danger }]}>
                     This user exists, but no business was found.
                   </Text>
                 </View>
@@ -627,42 +642,68 @@ export function SettingsScreen({ navigation }: Props) {
                 <AppButton
                   title="Setup business"
                   onPress={() => navigation.navigate("BusinessSetup")}
+                  fullWidth
                 />
               </>
             )}
           </AppCard>
 
           <AppCard style={styles.sectionCard}>
-            <Text style={styles.cardTitle}>Store</Text>
+            <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Appearance</Text>
+
+            <Text style={[styles.label, { color: theme.textSecondary }]}>Theme mode</Text>
+            <View style={styles.appearanceButtonRow}>
+              <AppButton
+                title="Light"
+                variant={mode === "light" ? "primary" : "secondary"}
+                onPress={() => setThemeMode("light")}
+                style={styles.appearanceButton}
+              />
+              <AppButton
+                title="Dark"
+                variant={mode === "dark" ? "primary" : "secondary"}
+                onPress={() => setThemeMode("dark")}
+                style={styles.appearanceButton}
+              />
+            </View>
+
+            <View style={[styles.infoBox, { backgroundColor: theme.primarySoft, borderColor: theme.primary }]}>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Active theme</Text>
+              <Text style={[styles.value, { color: theme.primary }]}>{mode === "light" ? "Light" : "Dark"}</Text>
+            </View>
+          </AppCard>
+
+          <AppCard style={styles.sectionCard}>
+            <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Store</Text>
 
             {store ? (
               <>
-                <View style={styles.infoBox}>
-                  <Text style={styles.label}>Store name</Text>
-                  <Text style={styles.value}>{store.name}</Text>
+                <View style={[styles.infoBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                  <Text style={[styles.label, { color: theme.textSecondary }]}>Store name</Text>
+                  <Text style={[styles.value, { color: theme.textPrimary }]}>{store.name}</Text>
                 </View>
 
-                <View style={styles.infoBox}>
-                  <Text style={styles.label}>Store code</Text>
-                  <Text style={styles.value}>{store.code}</Text>
+                <View style={[styles.infoBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                  <Text style={[styles.label, { color: theme.textSecondary }]}>Store code</Text>
+                  <Text style={[styles.value, { color: theme.textPrimary }]}>{store.code}</Text>
                 </View>
 
-                <View style={styles.infoBox}>
-                  <Text style={styles.label}>Address</Text>
-                  <Text style={styles.value}>{store.address || "N/A"}</Text>
+                <View style={[styles.infoBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                  <Text style={[styles.label, { color: theme.textSecondary }]}>Address</Text>
+                  <Text style={[styles.value, { color: theme.textPrimary }]}>{store.address || "N/A"}</Text>
                 </View>
 
-                <View style={styles.infoBox}>
-                  <Text style={styles.label}>Status</Text>
-                  <Text style={styles.value}>
+                <View style={[styles.infoBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                  <Text style={[styles.label, { color: theme.textSecondary }]}>Status</Text>
+                  <Text style={[styles.value, { color: store.is_active ? theme.success : theme.warning }]}>
                     {store.is_active ? "Active" : "Inactive"}
                   </Text>
                 </View>
               </>
             ) : (
-              <View style={styles.statusBoxBad}>
-                <Text style={styles.statusTitleBad}>No active store found</Text>
-                <Text style={styles.statusTextBad}>
+              <View style={[styles.statusBoxBad, { backgroundColor: theme.dangerSoft, borderColor: theme.danger }]}>
+                <Text style={[styles.statusTitleBad, { color: theme.danger }]}>No active store found</Text>
+                <Text style={[styles.statusTextBad, { color: theme.danger }]}>
                   Business exists, but active store was not loaded.
                 </Text>
               </View>
@@ -670,18 +711,30 @@ export function SettingsScreen({ navigation }: Props) {
           </AppCard>
 
           <AppCard style={styles.sectionCard}>
-            <Text style={styles.cardTitle}>Sync queue</Text>
+            <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Sync queue</Text>
 
-            <View style={styles.infoBox}>
-              <Text style={styles.label}>Queue status</Text>
-              <Text style={styles.value}>
-                Pending: {queueSummary.pending} | Synced: {queueSummary.synced} | Failed: {queueSummary.failed} | Total: {queueSummary.total}
-              </Text>
+            <View style={styles.queueGrid}>
+              <View style={[styles.queueBox, { backgroundColor: theme.warningSoft, borderColor: theme.warning }]}>
+                <Text style={[styles.queueLabel, { color: theme.textSecondary }]}>Pending</Text>
+                <Text style={[styles.queueValue, { color: theme.warning }]}>{queueSummary.pending}</Text>
+              </View>
+              <View style={[styles.queueBox, { backgroundColor: theme.successSoft, borderColor: theme.success }]}>
+                <Text style={[styles.queueLabel, { color: theme.textSecondary }]}>Synced</Text>
+                <Text style={[styles.queueValue, { color: theme.success }]}>{queueSummary.synced}</Text>
+              </View>
+              <View style={[styles.queueBox, { backgroundColor: theme.dangerSoft, borderColor: theme.danger }]}>
+                <Text style={[styles.queueLabel, { color: theme.textSecondary }]}>Failed</Text>
+                <Text style={[styles.queueValue, { color: theme.danger }]}>{queueSummary.failed}</Text>
+              </View>
+              <View style={[styles.queueBox, { backgroundColor: theme.primarySoft, borderColor: theme.primary }]}>
+                <Text style={[styles.queueLabel, { color: theme.textSecondary }]}>Total</Text>
+                <Text style={[styles.queueValue, { color: theme.primary }]}>{queueSummary.total}</Text>
+              </View>
             </View>
 
-            <View style={styles.infoBox}>
-              <Text style={styles.label}>Last sync</Text>
-              <Text style={styles.value}>
+            <View style={[styles.infoBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+              <Text style={[styles.label, { color: theme.textSecondary }]}>Last sync</Text>
+              <Text style={[styles.value, { color: theme.textPrimary }]}>
                 {queueSummary.lastSyncedAt
                   ? new Date(queueSummary.lastSyncedAt).toLocaleString()
                   : "Never"}
@@ -690,6 +743,7 @@ export function SettingsScreen({ navigation }: Props) {
 
             {isDevToolsEnabled ? (
               <>
+                <Text style={[styles.subsectionTitle, { color: theme.textPrimary }]}>Developer sync tools</Text>
                 <AppButton
                   title={syncing ? "Working..." : "Build Products & Customers Sync Queue"}
                   variant="secondary"
@@ -800,24 +854,20 @@ export function SettingsScreen({ navigation }: Props) {
                 />
               </>
             ) : (
-              <Text style={styles.helpText}>
+              <Text style={[styles.helpText, { color: theme.textSecondary }]}>
                 Developer sync tools are hidden in production mode.
               </Text>
             )}
 
             {syncMessage ? (
-              <Text style={styles.successText}>{syncMessage}</Text>
+              <View style={[styles.messageBox, { backgroundColor: theme.successSoft, borderColor: theme.success }]}>
+                <Text style={[styles.successText, { color: theme.success }]}>{syncMessage}</Text>
+              </View>
             ) : null}
           </AppCard>
 
           <AppCard style={styles.sectionCard}>
-            <Text style={styles.cardTitle}>Actions</Text>
-
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
-
-            {successMessage ? (
-              <Text style={styles.successText}>{successMessage}</Text>
-            ) : null}
+            <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Actions</Text>
 
             <AppButton
               title="Refresh cloud status"
@@ -848,15 +898,15 @@ export function SettingsScreen({ navigation }: Props) {
               <>
                 <View style={styles.spacer} />
 
-                <Text style={styles.dangerTitle}>Developer tools</Text>
+                <Text style={[styles.dangerTitle, { color: theme.danger }]}>Developer tools</Text>
 
-                <Text style={styles.dangerText}>
+                <Text style={[styles.dangerText, { color: theme.textSecondary }]}>
                   Developer sync and cloud reset actions are only visible in dev mode.
                 </Text>
 
                 <AppButton
                   title={syncing ? "Working..." : "Clear Local Data Only"}
-                  variant="secondary"
+                  variant="danger"
                   onPress={handleClearLocalDataOnly}
                   disabled={isActionBusy}
                 />
@@ -869,7 +919,7 @@ export function SettingsScreen({ navigation }: Props) {
                       ? "Deleting business data..."
                       : "Delete Products & Customers Everywhere"
                   }
-                  variant="secondary"
+                  variant="danger"
                   onPress={handleDeleteProductsAndCustomersEverywhere}
                   disabled={isActionBusy}
                 />
@@ -885,118 +935,147 @@ export function SettingsScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
   },
   scrollContent: {
-    padding: 20,
+    padding: 18,
+    paddingBottom: 40,
   },
   wrapper: {
     width: "100%",
-    maxWidth: 900,
+    maxWidth: 860,
     alignSelf: "center",
+    gap: 16,
   },
   headerCard: {
-    marginBottom: 16,
+    borderRadius: 20,
   },
   sectionCard: {
-    marginBottom: 16,
+    borderRadius: 20,
+    gap: 2,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "900",
-    color: "#0F172A",
     marginBottom: 16,
   },
   infoBox: {
-    backgroundColor: "#F8FAFC",
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 14,
     marginBottom: 10,
   },
   label: {
     fontSize: 12,
-    color: "#64748B",
     fontWeight: "800",
     marginBottom: 6,
   },
   value: {
     fontSize: 14,
-    color: "#0F172A",
     fontWeight: "800",
     lineHeight: 20,
   },
   statusBoxGood: {
-    backgroundColor: "#DCFCE7",
     borderWidth: 1,
-    borderColor: "#BBF7D0",
     borderRadius: 14,
     padding: 14,
     marginBottom: 14,
   },
   statusTitle: {
     fontSize: 15,
-    color: "#166534",
     fontWeight: "900",
     marginBottom: 6,
   },
   statusText: {
     fontSize: 13,
-    color: "#166534",
     fontWeight: "700",
     lineHeight: 19,
   },
   statusBoxBad: {
-    backgroundColor: "#FEF2F2",
     borderWidth: 1,
-    borderColor: "#FECACA",
     borderRadius: 14,
     padding: 14,
     marginBottom: 14,
   },
   statusTitleBad: {
     fontSize: 15,
-    color: "#991B1B",
     fontWeight: "900",
     marginBottom: 6,
   },
   statusTextBad: {
     fontSize: 13,
-    color: "#991B1B",
     fontWeight: "700",
     lineHeight: 19,
   },
   errorText: {
-    color: "#DC2626",
     fontSize: 13,
-    fontWeight: "700",
-    marginBottom: 14,
+    fontWeight: "800",
+    lineHeight: 19,
   },
   successText: {
-    color: "#15803D",
     fontSize: 13,
-    fontWeight: "700",
-    marginTop: 12,
-    marginBottom: 8,
+    fontWeight: "800",
+    lineHeight: 19,
   },
   dangerTitle: {
     marginTop: 16,
     marginBottom: 6,
     fontSize: 16,
     fontWeight: "900",
-    color: "#b91c1c",
   },
   dangerText: {
     marginBottom: 12,
     fontSize: 13,
     lineHeight: 18,
-    color: "#7f1d1d",
   },
   helpText: {
     fontSize: 13,
-    color: "#475569",
     lineHeight: 18,
+  },
+  appearanceButtonRow: {
+    flexDirection: "row",
+    gap: 10,
+    flexWrap: "wrap",
+    marginBottom: 10,
+  },
+  appearanceButton: {
+    flexGrow: 1,
+    minWidth: 120,
+  },
+  messageBox: {
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  queueGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginBottom: 10,
+  },
+  queueBox: {
+    flexGrow: 1,
+    flexBasis: 130,
+    minWidth: 130,
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 14,
+    gap: 4,
+  },
+  queueLabel: {
+    fontSize: 12,
+    fontWeight: "900",
+    textTransform: "uppercase",
+  },
+  queueValue: {
+    fontSize: 24,
+    fontWeight: "900",
+  },
+  subsectionTitle: {
+    fontSize: 15,
+    fontWeight: "900",
+    marginBottom: 12,
+    marginTop: 4,
   },
   spacer: {
     height: 12,

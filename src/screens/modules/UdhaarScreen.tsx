@@ -21,6 +21,7 @@ import {
   getUdhaarCustomers,
   receiveCustomerPayment,
 } from "../../database/udhaarRepository";
+import { useAppTheme } from "../../theme/useAppTheme";
 import type { UdhaarCustomer, UdhaarLedgerEntry } from "../../types/udhaar";
 
 function parseNumber(value: string): number {
@@ -39,7 +40,12 @@ function parseNumber(value: string): number {
   return parsed;
 }
 
+function formatMoney(value: number): string {
+  return `Rs ${Number(value || 0).toLocaleString("en-PK")}`;
+}
+
 export function UdhaarScreen() {
+  const { theme } = useAppTheme();
   const [customers, setCustomers] = useState<UdhaarCustomer[]>([]);
   const [ledgerEntries, setLedgerEntries] = useState<UdhaarLedgerEntry[]>([]);
 
@@ -177,7 +183,7 @@ export function UdhaarScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.wrapper}>
           <AppCard style={styles.headerCard}>
@@ -188,14 +194,16 @@ export function UdhaarScreen() {
             />
 
             <View style={styles.summaryRow}>
-              <View style={styles.summaryBox}>
-                <Text style={styles.summaryLabel}>Total udhaar</Text>
-                <Text style={styles.summaryValue}>Rs {totalUdhaar}</Text>
+              <View style={[styles.summaryBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>Total udhaar</Text>
+                <Text style={[styles.summaryValue, { color: theme.warning }]}>{formatMoney(totalUdhaar)}</Text>
+                <Text style={[styles.summaryHint, { color: theme.textMuted }]}>Customer balance</Text>
               </View>
 
-              <View style={styles.summaryBox}>
-                <Text style={styles.summaryLabel}>Customers pending</Text>
-                <Text style={styles.summaryValue}>{customersWithBalance}</Text>
+              <View style={[styles.summaryBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>Customers pending</Text>
+                <Text style={[styles.summaryValue, { color: theme.textPrimary }]}>{customersWithBalance}</Text>
+                <Text style={[styles.summaryHint, { color: theme.textMuted }]}>With due amount</Text>
               </View>
             </View>
           </AppCard>
@@ -208,7 +216,7 @@ export function UdhaarScreen() {
           ) : (
             <>
               <AppCard style={styles.sectionCard}>
-                <Text style={styles.cardTitle}>Customers</Text>
+                <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Customers</Text>
 
                 <View style={styles.customerGrid}>
                   {customers.map((customer) => (
@@ -217,38 +225,42 @@ export function UdhaarScreen() {
                       onPress={() => handleSelectCustomer(customer.id)}
                       style={[
                         styles.customerOption,
+                        { backgroundColor: theme.card, borderColor: theme.border },
                         selectedCustomerId === customer.id &&
-                          styles.customerOptionActive,
+                          {
+                            backgroundColor: theme.primarySoft,
+                            borderColor: theme.primary,
+                            borderWidth: 2,
+                          },
                       ]}
                     >
                       <View style={styles.customerTopRow}>
                         <Text
                           style={[
                             styles.customerName,
-                            selectedCustomerId === customer.id &&
-                              styles.customerNameActive,
+                            { color: selectedCustomerId === customer.id ? theme.primary : theme.textPrimary },
                           ]}
                         >
                           {customer.name}
                         </Text>
 
                         {customer.current_balance > 0 ? (
-                          <View style={styles.dueBadge}>
-                            <Text style={styles.dueBadgeText}>Due</Text>
+                          <View style={[styles.dueBadge, { backgroundColor: theme.dangerSoft, borderColor: theme.danger }]}>
+                            <Text style={[styles.dueBadgeText, { color: theme.danger }]}>Due</Text>
                           </View>
                         ) : (
-                          <View style={styles.clearBadge}>
-                            <Text style={styles.clearBadgeText}>Clear</Text>
+                          <View style={[styles.clearBadge, { backgroundColor: theme.successSoft, borderColor: theme.success }]}>
+                            <Text style={[styles.clearBadgeText, { color: theme.success }]}>Clear</Text>
                           </View>
                         )}
                       </View>
 
-                      <Text style={styles.customerMeta}>
+                      <Text style={[styles.customerMeta, { color: selectedCustomerId === customer.id ? theme.textPrimary : theme.textSecondary }]}>
                         Phone: {customer.phone || "N/A"}
                       </Text>
 
-                      <Text style={styles.customerBalance}>
-                        Rs {customer.current_balance}
+                      <Text style={[styles.customerBalance, { color: theme.textPrimary }]}>
+                        {formatMoney(customer.current_balance)}
                       </Text>
                     </Pressable>
                   ))}
@@ -256,20 +268,27 @@ export function UdhaarScreen() {
               </AppCard>
 
               <AppCard style={styles.sectionCard}>
-                <Text style={styles.cardTitle}>Receive payment</Text>
+                <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Receive payment</Text>
 
                 {selectedCustomer ? (
                   <>
-                    <View style={styles.selectedCustomerBox}>
-                      <Text style={styles.selectedCustomerLabel}>
-                        Selected customer
-                      </Text>
-                      <Text style={styles.selectedCustomerName}>
-                        {selectedCustomer.name}
-                      </Text>
-                      <Text style={styles.selectedCustomerBalance}>
-                        Current balance: Rs {selectedCustomer.current_balance}
-                      </Text>
+                    <View style={[styles.selectedCustomerBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+                      <View style={styles.selectedCustomerTopRow}>
+                        <View style={styles.selectedCustomerInfo}>
+                          <Text style={[styles.selectedCustomerLabel, { color: theme.textMuted }]}>
+                            Selected customer
+                          </Text>
+                          <Text style={[styles.selectedCustomerName, { color: theme.textPrimary }]}>
+                            {selectedCustomer.name}
+                          </Text>
+                        </View>
+                        <View style={[styles.selectedBalancePill, { backgroundColor: theme.card, borderColor: theme.border }]}>
+                          <Text style={[styles.selectedBalanceLabel, { color: theme.textMuted }]}>Balance</Text>
+                          <Text style={[styles.selectedBalanceValue, { color: theme.warning }]}>
+                            {formatMoney(selectedCustomer.current_balance)}
+                          </Text>
+                        </View>
+                      </View>
                     </View>
 
                     <AppInput
@@ -287,51 +306,62 @@ export function UdhaarScreen() {
                       onChangeText={setNote}
                     />
 
-                    {error ? <Text style={styles.errorText}>{error}</Text> : null}
+                    {error ? (
+                      <View style={[styles.messageBox, { backgroundColor: theme.dangerSoft, borderColor: theme.danger }]}>
+                        <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text>
+                      </View>
+                    ) : null}
 
                     {successMessage ? (
-                      <Text style={styles.successText}>{successMessage}</Text>
+                      <View style={[styles.messageBox, { backgroundColor: theme.successSoft, borderColor: theme.success }]}>
+                        <Text style={[styles.successText, { color: theme.success }]}>{successMessage}</Text>
+                      </View>
                     ) : null}
 
                     <AppButton
                       title={saving ? "Saving payment..." : "Receive payment"}
                       onPress={handleReceivePayment}
+                      style={styles.paymentButton}
+                      fullWidth
                     />
                   </>
                 ) : (
-                  <Text style={styles.mutedText}>Select a customer first.</Text>
+                  <Text style={[styles.mutedText, { color: theme.textMuted }]}>Select a customer first.</Text>
                 )}
               </AppCard>
 
               <AppCard style={styles.sectionCard}>
-                <Text style={styles.cardTitle}>Ledger history</Text>
+                <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Ledger history</Text>
 
                 {!selectedCustomer ? (
-                  <Text style={styles.mutedText}>Select a customer first.</Text>
+                  <Text style={[styles.mutedText, { color: theme.textMuted }]}>Select a customer first.</Text>
                 ) : ledgerEntries.length === 0 ? (
-                  <Text style={styles.mutedText}>
+                  <Text style={[styles.mutedText, { color: theme.textMuted }]}>
                     No unpaid invoices or payments found for this customer.
                   </Text>
                 ) : (
                   <View style={styles.ledgerList}>
                     {ledgerEntries.map((entry) => (
-                      <View key={entry.id} style={styles.ledgerItem}>
+                      <View key={entry.id} style={[styles.ledgerItem, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
                         <View style={styles.ledgerLeft}>
                           <View
                             style={[
                               styles.ledgerDot,
-                              entry.type === "payment"
-                                ? styles.paymentDot
-                                : styles.invoiceDot,
+                              {
+                                backgroundColor:
+                                  entry.type === "payment"
+                                    ? theme.success
+                                    : theme.danger,
+                              },
                             ]}
                           />
 
                           <View style={styles.ledgerTextBox}>
-                            <Text style={styles.ledgerTitle}>{entry.title}</Text>
-                            <Text style={styles.ledgerDescription}>
+                            <Text style={[styles.ledgerTitle, { color: theme.textPrimary }]}>{entry.title}</Text>
+                            <Text style={[styles.ledgerDescription, { color: theme.textSecondary }]}>
                               {entry.description}
                             </Text>
-                            <Text style={styles.ledgerDate}>
+                            <Text style={[styles.ledgerDate, { color: theme.textMuted }]}>
                               {new Date(entry.created_at).toLocaleString()}
                             </Text>
                           </View>
@@ -341,12 +371,12 @@ export function UdhaarScreen() {
                           style={[
                             styles.ledgerAmount,
                             entry.type === "payment"
-                              ? styles.paymentAmount
-                              : styles.invoiceAmount,
+                              ? { color: theme.success }
+                              : { color: theme.danger },
                           ]}
                         >
-                          {entry.type === "payment" ? "-" : "+"} Rs{" "}
-                          {entry.amount}
+                          {entry.type === "payment" ? "-" : "+"}{" "}
+                          {formatMoney(entry.amount)}
                         </Text>
                       </View>
                     ))}
@@ -364,67 +394,68 @@ export function UdhaarScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
   },
   scrollContent: {
-    padding: 20,
+    padding: 18,
+    paddingBottom: 40,
   },
   wrapper: {
     width: "100%",
-    maxWidth: 900,
+    maxWidth: 860,
     alignSelf: "center",
+    gap: 16,
   },
   headerCard: {
-    marginBottom: 16,
+    borderRadius: 20,
+    gap: 14,
   },
   summaryRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 12,
   },
   summaryBox: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
-    borderRadius: 14,
-    padding: 14,
+    minWidth: 180,
+    borderRadius: 16,
+    padding: 16,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
   },
   summaryLabel: {
-    fontSize: 13,
-    color: "#64748B",
+    fontSize: 12,
     marginBottom: 6,
+    fontWeight: "800",
+    textTransform: "uppercase",
   },
   summaryValue: {
-    fontSize: 24,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: 26,
+    fontWeight: "900",
+  },
+  summaryHint: {
+    fontSize: 12,
+    marginTop: 4,
+    fontWeight: "700",
   },
   sectionCard: {
-    marginBottom: 16,
+    borderRadius: 20,
+    gap: 2,
   },
   cardTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontSize: 18,
+    fontWeight: "900",
     marginBottom: 16,
   },
   customerGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    gap: 12,
   },
   customerOption: {
     minWidth: 220,
     flexGrow: 1,
-    backgroundColor: "#F8FAFC",
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    padding: 14,
-  },
-  customerOptionActive: {
-    backgroundColor: "#EFF6FF",
-    borderColor: "#2563EB",
+    padding: 16,
   },
   customerTopRow: {
     flexDirection: "row",
@@ -436,93 +467,112 @@ const styles = StyleSheet.create({
   customerName: {
     flex: 1,
     fontSize: 16,
-    fontWeight: "800",
-    color: "#0F172A",
-  },
-  customerNameActive: {
-    color: "#1D4ED8",
+    fontWeight: "900",
   },
   customerMeta: {
     fontSize: 13,
-    color: "#64748B",
     marginBottom: 10,
+    fontWeight: "700",
   },
   customerBalance: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "900",
-    color: "#0F172A",
   },
   dueBadge: {
-    backgroundColor: "#FEE2E2",
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 5,
+    borderWidth: 1,
   },
   dueBadgeText: {
-    color: "#B91C1C",
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "900",
+    textTransform: "uppercase",
   },
   clearBadge: {
-    backgroundColor: "#DCFCE7",
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 5,
+    borderWidth: 1,
   },
   clearBadgeText: {
-    color: "#15803D",
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "900",
+    textTransform: "uppercase",
   },
   selectedCustomerBox: {
-    backgroundColor: "#F8FAFC",
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: 16,
+    padding: 16,
     marginBottom: 16,
+  },
+  selectedCustomerTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    flexWrap: "wrap",
+  },
+  selectedCustomerInfo: {
+    flex: 1,
   },
   selectedCustomerLabel: {
     fontSize: 12,
-    color: "#64748B",
     marginBottom: 4,
+    fontWeight: "800",
+    textTransform: "uppercase",
   },
   selectedCustomerName: {
     fontSize: 18,
-    fontWeight: "800",
-    color: "#0F172A",
-    marginBottom: 4,
+    fontWeight: "900",
   },
-  selectedCustomerBalance: {
-    fontSize: 14,
-    color: "#334155",
-    fontWeight: "700",
+  selectedBalancePill: {
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    alignItems: "flex-end",
+  },
+  selectedBalanceLabel: {
+    fontSize: 11,
+    fontWeight: "800",
+    textTransform: "uppercase",
+  },
+  selectedBalanceValue: {
+    fontSize: 16,
+    fontWeight: "900",
+    marginTop: 2,
+  },
+  messageBox: {
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 14,
   },
   errorText: {
     fontSize: 13,
-    color: "#DC2626",
-    fontWeight: "700",
-    marginBottom: 14,
+    fontWeight: "800",
+    lineHeight: 19,
   },
   successText: {
     fontSize: 13,
-    color: "#15803D",
-    fontWeight: "700",
-    marginBottom: 14,
+    fontWeight: "800",
+    lineHeight: 19,
+  },
+  paymentButton: {
+    marginTop: 4,
   },
   mutedText: {
     fontSize: 14,
-    color: "#64748B",
     lineHeight: 21,
   },
   ledgerList: {
     gap: 10,
   },
   ledgerItem: {
-    backgroundColor: "#F8FAFC",
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 14,
     flexDirection: "row",
     alignItems: "flex-start",
@@ -540,39 +590,28 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     marginTop: 5,
   },
-  invoiceDot: {
-    backgroundColor: "#DC2626",
-  },
-  paymentDot: {
-    backgroundColor: "#16A34A",
-  },
   ledgerTextBox: {
     flex: 1,
   },
   ledgerTitle: {
     fontSize: 15,
-    fontWeight: "800",
-    color: "#0F172A",
+    fontWeight: "900",
     marginBottom: 3,
   },
   ledgerDescription: {
     fontSize: 13,
-    color: "#64748B",
     marginBottom: 4,
     lineHeight: 19,
   },
   ledgerDate: {
     fontSize: 12,
-    color: "#94A3B8",
   },
   ledgerAmount: {
     fontSize: 15,
     fontWeight: "900",
-  },
-  invoiceAmount: {
-    color: "#B91C1C",
-  },
-  paymentAmount: {
-    color: "#15803D",
+    textAlign: "right",
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
   },
 });

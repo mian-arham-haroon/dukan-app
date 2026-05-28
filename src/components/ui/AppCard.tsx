@@ -1,26 +1,45 @@
 import React from "react";
-import { StyleSheet, View, ViewStyle } from "react-native";
+import { StyleProp, StyleSheet, View, ViewProps, ViewStyle } from "react-native";
+import { useAppTheme } from "../../theme/useAppTheme";
 
-type Props = {
+type Variant = "default" | "muted";
+
+type Props = ViewProps & {
   children: React.ReactNode;
-  style?: ViewStyle;
+  variant?: Variant;
+  style?: StyleProp<ViewStyle>;
 };
 
-export function AppCard({ children, style }: Props) {
-  return <View style={[styles.card, style]}>{children}</View>;
+export function AppCard({ children, variant = "default", style, ...rest }: Props) {
+  const { theme } = useAppTheme();
+
+  return (
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor:
+            variant === "muted" ? theme.cardMuted : theme.card,
+          borderColor: variant === "muted" ? theme.border : theme.borderStrong,
+          shadowColor: theme.shadow,
+        },
+        style,
+      ]}
+      {...rest}
+    >
+      {children}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 18,
-    padding: 18,
+    borderRadius: 20,
+    padding: 20,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    shadowColor: "#000000",
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
     elevation: 2,
   },
 });

@@ -13,10 +13,12 @@ import { AppCard, AppHeader, AppInput } from "../../components/ui";
 import type { RootStackParamList } from "../../navigation/RootNavigator";
 import { createBusinessWithFirstStore } from "../../services/businessCloudService";
 import { useAuthStore } from "../../store/authStore";
+import { useAppTheme } from "../../theme/useAppTheme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "BusinessSetup">;
 
 export function BusinessSetupScreen({ navigation }: Props) {
+  const { theme } = useAppTheme();
   const user = useAuthStore((state) => state.user);
 
   const [businessName, setBusinessName] = useState("My Dukan");
@@ -69,7 +71,7 @@ export function BusinessSetupScreen({ navigation }: Props) {
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.wrapper}>
           <AppHeader
@@ -79,7 +81,7 @@ export function BusinessSetupScreen({ navigation }: Props) {
           />
 
           <AppCard style={styles.card}>
-            <Text style={styles.cardTitle}>Business details</Text>
+            <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Business details</Text>
 
             <AppInput
               label="Business name"
@@ -102,14 +104,14 @@ export function BusinessSetupScreen({ navigation }: Props) {
               onChangeText={setAddress}
             />
 
-            <View style={styles.infoBox}>
-              <Text style={styles.infoTitle}>Default setup</Text>
-              <Text style={styles.infoText}>Currency: PKR</Text>
-              <Text style={styles.infoText}>Country: Pakistan</Text>
-              <Text style={styles.infoText}>Your role: Owner</Text>
+            <View style={[styles.infoBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+              <Text style={[styles.infoTitle, { color: theme.textPrimary }]}>Default setup</Text>
+              <Text style={[styles.infoText, { color: theme.textSecondary }]}>Currency: PKR</Text>
+              <Text style={[styles.infoText, { color: theme.textSecondary }]}>Country: Pakistan</Text>
+              <Text style={[styles.infoText, { color: theme.textSecondary }]}>Your role: Owner</Text>
             </View>
 
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            {error ? <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text> : null}
 
             <AppButton
               title={saving ? "Creating business..." : "Create business"}

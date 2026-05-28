@@ -14,10 +14,12 @@ import type { RootStackParamList } from "../../navigation/RootNavigator";
 import { ensureCloudProfile } from "../../services/businessCloudService";
 import { isSupabaseConfigured, supabase } from "../../services/supabase";
 import { useAuthStore } from "../../store/authStore";
+import { useAppTheme } from "../../theme/useAppTheme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Signup">;
 
 export function SignupScreen({ navigation }: Props) {
+  const { theme } = useAppTheme();
   const setSession = useAuthStore((state) => state.setSession);
 
   const [fullName, setFullName] = useState("");
@@ -100,17 +102,30 @@ export function SignupScreen({ navigation }: Props) {
   }
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.wrapper}>
-          <AppHeader
-            eyebrow="Account setup"
-            title="Create Account"
-            subtitle="Create your owner account. After confirmation, you will setup business and store."
-          />
+          <View style={styles.hero}>
+            <View style={[styles.brandMark, { backgroundColor: theme.primarySoft }]}>
+              <Text style={[styles.brandMarkText, { color: theme.primary }]}>D</Text>
+            </View>
+
+            <AppHeader
+              eyebrow="Account setup"
+              title="Create Account"
+              subtitle="Create your owner account. After confirmation, you will setup business and store."
+            />
+          </View>
 
           <AppCard style={styles.card}>
-            <Text style={styles.cardTitle}>Business owner details</Text>
+            <View style={styles.cardHeader}>
+              <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>
+                Business owner details
+              </Text>
+              <Text style={[styles.cardSubtitle, { color: theme.textSecondary }]}>
+                Use the owner email you want connected with this business.
+              </Text>
+            </View>
 
             <AppInput
               label="Full name"
@@ -135,14 +150,14 @@ export function SignupScreen({ navigation }: Props) {
               secureTextEntry
             />
 
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            {error ? <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text> : null}
 
             {successMessage ? (
-              <Text style={styles.successText}>{successMessage}</Text>
+              <Text style={[styles.successText, { color: theme.success }]}>{successMessage}</Text>
             ) : null}
 
             {!isSupabaseConfigured ? (
-              <Text style={styles.warningText}>
+              <Text style={[styles.warningText, { backgroundColor: theme.warningSoft, borderColor: theme.warning, color: theme.warning }]}>
                 Supabase env values are missing. Add EXPO_PUBLIC_SUPABASE_URL
                 and EXPO_PUBLIC_SUPABASE_ANON_KEY in .env.
               </Text>
@@ -174,41 +189,57 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    padding: 20,
+    padding: 22,
     justifyContent: "center",
   },
   wrapper: {
     width: "100%",
-    maxWidth: 440,
+    maxWidth: 460,
     alignSelf: "center",
   },
+  hero: {
+    marginBottom: 6,
+  },
+  brandMark: {
+    width: 58,
+    height: 58,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 18,
+  },
+  brandMarkText: {
+    fontSize: 28,
+    fontWeight: "900",
+  },
   card: {
-    marginTop: 18,
+    marginTop: 14,
+  },
+  cardHeader: {
+    marginBottom: 18,
   },
   cardTitle: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "900",
-    color: "#0F172A",
-    marginBottom: 16,
+    marginBottom: 6,
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    lineHeight: 21,
   },
   errorText: {
-    color: "#DC2626",
     fontSize: 13,
     fontWeight: "700",
     marginBottom: 14,
   },
   successText: {
-    color: "#15803D",
     fontSize: 13,
     fontWeight: "700",
     marginBottom: 14,
   },
   warningText: {
-    color: "#92400E",
-    backgroundColor: "#FFFBEB",
-    borderColor: "#FDE68A",
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 12,
     fontSize: 13,
     fontWeight: "700",
