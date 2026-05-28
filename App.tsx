@@ -24,14 +24,6 @@ export default function App() {
 
 function AppShell() {
   const { theme, mode } = useAppTheme();
-
-  useEffect(() => {
-    startAutoSyncWatcher();
-
-    return () => {
-      stopAutoSyncWatcher();
-    };
-  }, []);
   const [retryKey, setRetryKey] = useState(0);
 
   const [appStatus, setAppStatus] = useState<AppStatus>({
@@ -70,6 +62,18 @@ function AppShell() {
       mounted = false;
     };
   }, [retryKey]);
+
+  useEffect(() => {
+    if (!appStatus.success) {
+      return;
+    }
+
+    startAutoSyncWatcher();
+
+    return () => {
+      stopAutoSyncWatcher();
+    };
+  }, [appStatus.success]);
 
   if (appStatus.loading) {
     return (
