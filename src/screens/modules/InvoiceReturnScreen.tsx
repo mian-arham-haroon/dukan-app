@@ -160,7 +160,6 @@ export function InvoiceReturnScreen({ route, navigation }: Props) {
     }
 
     try {
-
       const result = await createInvoiceReturn({
         invoiceId: preview.invoiceId,
         lines,
@@ -193,7 +192,9 @@ export function InvoiceReturnScreen({ route, navigation }: Props) {
       <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
         <View style={styles.wrapper}>
           <AppCard>
-            <Text style={[styles.errorText, { color: theme.danger }]}>{error || "Invoice not found."}</Text>
+            <Text style={[styles.errorText, { color: theme.danger }]}>
+              {error || "Invoice not found."}
+            </Text>
           </AppCard>
         </View>
       </SafeAreaView>
@@ -208,36 +209,149 @@ export function InvoiceReturnScreen({ route, navigation }: Props) {
             <AppHeader
               eyebrow="Return / Refund"
               title={preview.invoiceNo}
-              subtitle={`${preview.customerName} · Balance ${formatMoney(
-                preview.balanceDue
-              )}`}
+              subtitle={preview.customerName}
             />
+
+            <View style={styles.headerStats}>
+              <View
+                style={[
+                  styles.statBox,
+                  { backgroundColor: theme.cardMuted, borderColor: theme.border },
+                ]}
+              >
+                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
+                  Balance due
+                </Text>
+                <Text style={[styles.statValue, { color: theme.warning }]}>
+                  {formatMoney(preview.balanceDue)}
+                </Text>
+              </View>
+
+              <View
+                style={[
+                  styles.statBox,
+                  { backgroundColor: theme.cardMuted, borderColor: theme.border },
+                ]}
+              >
+                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>
+                  Paid amount
+                </Text>
+                <Text style={[styles.statValue, { color: theme.textPrimary }]}>
+                  {formatMoney(preview.paidAmount)}
+                </Text>
+              </View>
+            </View>
           </AppCard>
 
-          {error ? <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text> : null}
+          {error ? (
+            <View
+              style={[
+                styles.messageBox,
+                {
+                  backgroundColor: theme.dangerSoft,
+                  borderColor: theme.danger,
+                },
+              ]}
+            >
+              <Text style={[styles.errorText, { color: theme.danger }]}>
+                {error}
+              </Text>
+            </View>
+          ) : null}
           {successMessage ? (
-            <Text style={[styles.successText, { color: theme.success }]}>{successMessage}</Text>
+            <View
+              style={[
+                styles.messageBox,
+                {
+                  backgroundColor: theme.successSoft,
+                  borderColor: theme.success,
+                },
+              ]}
+            >
+              <Text style={[styles.successText, { color: theme.success }]}>
+                {successMessage}
+              </Text>
+            </View>
           ) : null}
 
           <AppCard style={styles.sectionCard}>
-            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Return items</Text>
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
+              Return items
+            </Text>
 
             {preview.lines.map((line) => {
               const key = line.productId ?? line.productName;
 
               return (
-                <View key={key} style={[styles.itemBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
-                  <Text style={[styles.itemTitle, { color: theme.textPrimary }]}>{line.productName}</Text>
+                <View
+                  key={key}
+                  style={[
+                    styles.itemBox,
+                    {
+                      backgroundColor: theme.cardMuted,
+                      borderColor: theme.border,
+                    },
+                  ]}
+                >
+                  <View style={styles.rowBetween}>
+                    <Text style={[styles.itemTitle, { color: theme.textPrimary }]}>
+                      {line.productName}
+                    </Text>
+                    <Text style={[styles.unitPrice, { color: theme.textSecondary }]}>
+                      {formatMoney(line.unitPrice)}
+                    </Text>
+                  </View>
 
-                  <Text style={[styles.mutedText, { color: theme.textSecondary }]}>
-                    Sold: {line.soldQuantity} · Already returned:{" "}
-                    {line.alreadyReturnedQuantity} · Max return:{" "}
-                    {line.maxReturnQuantity}
-                  </Text>
-
-                  <Text style={[styles.mutedText, { color: theme.textSecondary }]}>
-                    Unit price: {formatMoney(line.unitPrice)}
-                  </Text>
+                  <View style={styles.qtyGrid}>
+                    <View
+                      style={[
+                        styles.qtyBox,
+                        {
+                          backgroundColor: theme.surfaceMuted,
+                          borderColor: theme.border,
+                        },
+                      ]}
+                    >
+                      <Text style={[styles.qtyLabel, { color: theme.textSecondary }]}>
+                        Sold
+                      </Text>
+                      <Text style={[styles.qtyValue, { color: theme.textPrimary }]}>
+                        {line.soldQuantity}
+                      </Text>
+                    </View>
+                    <View
+                      style={[
+                        styles.qtyBox,
+                        {
+                          backgroundColor: theme.surfaceMuted,
+                          borderColor: theme.border,
+                        },
+                      ]}
+                    >
+                      <Text style={[styles.qtyLabel, { color: theme.textSecondary }]}>
+                        Returned
+                      </Text>
+                      <Text style={[styles.qtyValue, { color: theme.textPrimary }]}>
+                        {line.alreadyReturnedQuantity}
+                      </Text>
+                    </View>
+                    <View
+                      style={[
+                        styles.qtyBox,
+                        {
+                          backgroundColor: theme.primarySoft,
+                          borderColor: theme.primary,
+                        },
+                      ]}
+                    >
+                      <Text style={[styles.qtyLabel, { color: theme.textSecondary }]}>
+                        Max return
+                      </Text>
+                      <Text style={[styles.qtyValue, { color: theme.primary }]}>
+                        {line.maxReturnQuantity}
+                      </Text>
+                    </View>
+                  </View>
 
                   <AppInput
                     label="Return quantity"
@@ -250,6 +364,7 @@ export function InvoiceReturnScreen({ route, navigation }: Props) {
                     }
                     keyboardType="numeric"
                     placeholder="0"
+                    containerStyle={styles.inputContainer}
                   />
                 </View>
               );
@@ -257,22 +372,51 @@ export function InvoiceReturnScreen({ route, navigation }: Props) {
           </AppCard>
 
           <AppCard style={styles.sectionCard}>
-            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Return summary</Text>
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
+              Return summary
+            </Text>
 
-            <View style={styles.rowBetween}>
-              <Text style={[styles.label, { color: theme.textSecondary }]}>Return total</Text>
-              <Text style={[styles.value, { color: theme.textPrimary }]}>{formatMoney(totals.returnTotal)}</Text>
+            <View
+              style={[
+                styles.summaryRow,
+                styles.summaryRowEmphasis,
+                {
+                  backgroundColor: theme.primarySoft,
+                  borderColor: theme.primary,
+                },
+              ]}
+            >
+              <Text style={[styles.label, { color: theme.textSecondary }]}>
+                Return total
+              </Text>
+              <Text style={[styles.summaryValue, { color: theme.primary }]}>
+                {formatMoney(totals.returnTotal)}
+              </Text>
             </View>
 
-            <View style={styles.rowBetween}>
-              <Text style={[styles.label, { color: theme.textSecondary }]}>Udhaar balance reduced</Text>
-              <Text style={[styles.value, { color: theme.textPrimary }]}>
+            <View
+              style={[
+                styles.summaryRow,
+                { backgroundColor: theme.successSoft, borderColor: theme.success },
+              ]}
+            >
+              <Text style={[styles.label, { color: theme.textSecondary }]}>
+                Udhaar balance reduced
+              </Text>
+              <Text style={[styles.value, { color: theme.success }]}>
                 {formatMoney(totals.balanceReduced)}
               </Text>
             </View>
 
-            <View style={styles.rowBetween}>
-              <Text style={[styles.label, { color: theme.textSecondary }]}>Cash refund</Text>
+            <View
+              style={[
+                styles.summaryRow,
+                { backgroundColor: theme.warningSoft, borderColor: theme.warning },
+              ]}
+            >
+              <Text style={[styles.label, { color: theme.textSecondary }]}>
+                Cash refund
+              </Text>
               <Text style={[styles.refundText, { color: theme.warning }]}>
                 {formatMoney(totals.cashRefund)}
               </Text>
@@ -284,12 +428,14 @@ export function InvoiceReturnScreen({ route, navigation }: Props) {
               onChangeText={setNote}
               placeholder="Optional return note"
               multiline
+              containerStyle={styles.noteInputContainer}
             />
 
             <AppButton
               title={saving ? "Saving return..." : "Save Return / Refund"}
               onPress={handleSaveReturn}
               disabled={saving}
+              fullWidth
             />
           </AppCard>
         </View>
@@ -301,71 +447,143 @@ export function InvoiceReturnScreen({ route, navigation }: Props) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#f8fafc",
   },
   scrollContent: {
-    padding: 16,
+    padding: 18,
     paddingBottom: 40,
   },
   wrapper: {
     width: "100%",
-    maxWidth: 900,
+    maxWidth: 860,
     alignSelf: "center",
-    gap: 14,
+    gap: 16,
   },
   headerCard: {
-    gap: 12,
+    gap: 14,
+    borderRadius: 20,
   },
   sectionCard: {
     gap: 12,
+    borderRadius: 20,
+  },
+  headerStats: {
+    flexDirection: "row",
+    gap: 10,
+    flexWrap: "wrap",
+  },
+  statBox: {
+    flex: 1,
+    minWidth: 150,
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 14,
+    gap: 5,
+  },
+  statLabel: {
+    fontSize: 12,
+    fontWeight: "900",
+    textTransform: "uppercase",
+  },
+  statValue: {
+    fontSize: 16,
+    fontWeight: "900",
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "900",
-    color: "#0f172a",
   },
   itemBox: {
     borderWidth: 1,
-    borderColor: "#e2e8f0",
-    borderRadius: 14,
-    padding: 12,
-    gap: 8,
-    backgroundColor: "#ffffff",
-  },
-  itemTitle: {
-    fontSize: 15,
-    fontWeight: "900",
-    color: "#0f172a",
-  },
-  mutedText: {
-    fontSize: 13,
-    color: "#64748b",
+    borderRadius: 16,
+    padding: 14,
+    gap: 12,
   },
   rowBetween: {
     flexDirection: "row",
     justifyContent: "space-between",
     gap: 12,
   },
+  itemTitle: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: "900",
+    lineHeight: 22,
+  },
+  unitPrice: {
+    fontSize: 13,
+    fontWeight: "900",
+    paddingTop: 2,
+  },
+  qtyGrid: {
+    flexDirection: "row",
+    gap: 8,
+    flexWrap: "wrap",
+  },
+  qtyBox: {
+    flex: 1,
+    minWidth: 92,
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    gap: 3,
+  },
+  qtyLabel: {
+    fontSize: 11,
+    fontWeight: "900",
+    textTransform: "uppercase",
+  },
+  qtyValue: {
+    fontSize: 16,
+    fontWeight: "900",
+  },
+  inputContainer: {
+    marginBottom: 0,
+  },
+  noteInputContainer: {
+    marginBottom: 4,
+  },
   label: {
+    flex: 1,
     fontSize: 14,
-    color: "#64748b",
+    fontWeight: "800",
   },
   value: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "900",
-    color: "#0f172a",
+  },
+  summaryValue: {
+    fontSize: 17,
+    fontWeight: "900",
   },
   refundText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "900",
-    color: "#b45309",
+  },
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 12,
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 14,
+  },
+  summaryRowEmphasis: {
+    paddingVertical: 16,
+  },
+  messageBox: {
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
   },
   errorText: {
-    color: "#b91c1c",
-    fontWeight: "700",
+    fontWeight: "800",
+    lineHeight: 19,
   },
   successText: {
-    color: "#166534",
-    fontWeight: "700",
+    fontWeight: "800",
+    lineHeight: 19,
   },
 });

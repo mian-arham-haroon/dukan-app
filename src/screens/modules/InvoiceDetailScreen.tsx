@@ -18,6 +18,7 @@ import {
   printInvoice,
 } from "../../services/invoicePrintService";
 import { voidInvoice } from "../../database/invoiceVoidRepository";
+import type { AppTheme } from "../../theme/theme";
 import { useAppTheme } from "../../theme/useAppTheme";
 import type { InvoicePrintData } from "../../types/invoicePrint";
 
@@ -35,6 +36,56 @@ function formatDate(value: string): string {
   }
 
   return date.toLocaleString();
+}
+
+function getDisplayStatus(invoice: InvoicePrintData): string {
+  if (invoice.payment_status === "void") {
+    return "VOID";
+  }
+
+  return (invoice.return_status ?? invoice.payment_status).toUpperCase();
+}
+
+function getStatusColors(status: string, theme: AppTheme) {
+  const normalizedStatus = status.toUpperCase();
+
+  if (normalizedStatus === "PAID" || normalizedStatus === "FULLY RETURNED") {
+    return {
+      backgroundColor: theme.successSoft,
+      borderColor: theme.success,
+      color: theme.success,
+    };
+  }
+
+  if (normalizedStatus === "PARTIAL" || normalizedStatus === "PARTIAL RETURNED") {
+    return {
+      backgroundColor: theme.warningSoft,
+      borderColor: theme.warning,
+      color: theme.warning,
+    };
+  }
+
+  if (normalizedStatus === "VOID") {
+    return {
+      backgroundColor: theme.dangerSoft,
+      borderColor: theme.danger,
+      color: theme.danger,
+    };
+  }
+
+  if (normalizedStatus === "UNPAID") {
+    return {
+      backgroundColor: theme.dangerSoft,
+      borderColor: theme.danger,
+      color: theme.danger,
+    };
+  }
+
+  return {
+    backgroundColor: theme.primarySoft,
+    borderColor: theme.primary,
+    color: theme.primary,
+  };
 }
 
 function confirmVoidInvoice(): Promise<boolean> {
@@ -172,22 +223,47 @@ export function InvoiceDetailScreen({ route, navigation }: Props) {
     );
   }
 
+  const displayStatus = getDisplayStatus(invoice);
+  const statusColors = getStatusColors(displayStatus, theme);
+
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.wrapper}>
           <AppCard style={styles.headerCard}>
-            <AppHeader
-              eyebrow="Invoice detail"
-              title={invoice.invoice_no}
-              subtitle={`${invoice.customer_name} · ${formatDate(
-                invoice.created_at
-              )}`}
-            />
+            <View style={styles.headerTop}>
+              <AppHeader
+                eyebrow="Invoice detail"
+                title={invoice.invoice_no}
+                subtitle={formatDate(invoice.created_at)}
+              />
 
-            <View style={styles.statusPill}>
-              <Text style={[styles.statusText, { color: theme.primary }]}>
-                {(invoice.return_status ?? invoice.payment_status).toUpperCase()}
+              <View
+                style={[
+                  styles.statusPill,
+                  {
+                    backgroundColor: statusColors.backgroundColor,
+                    borderColor: statusColors.borderColor,
+                  },
+                ]}
+              >
+                <Text style={[styles.statusText, { color: statusColors.color }]}>
+                  {displayStatus}
+                </Text>
+              </View>
+            </View>
+
+            <View
+              style={[
+                styles.customerPanel,
+                { backgroundColor: theme.cardMuted, borderColor: theme.border },
+              ]}
+            >
+              <Text style={[styles.metaLabel, { color: theme.textSecondary }]}>
+                Customer
+              </Text>
+              <Text style={[styles.customerName, { color: theme.textPrimary }]}>
+                {invoice.customer_name}
               </Text>
             </View>
 
@@ -195,6 +271,8 @@ export function InvoiceDetailScreen({ route, navigation }: Props) {
               title={printing ? "Opening..." : "Share / Print Invoice"}
               onPress={handlePrint}
               disabled={printing}
+              variant="secondary"
+              fullWidth
             />
 
             {invoice.payment_status !== "void" ? (
@@ -207,6 +285,7 @@ export function InvoiceDetailScreen({ route, navigation }: Props) {
                     invoiceNo: invoice.invoice_no,
                   })
                 }
+                fullWidth
               />
             ) : null}
 
@@ -215,58 +294,139 @@ export function InvoiceDetailScreen({ route, navigation }: Props) {
                 title={voiding ? "Voiding..." : "Cancel / Void Invoice"}
                 onPress={handleVoidInvoice}
                 disabled={voiding}
+                variant="danger"
+                fullWidth
+                style={styles.dangerButton}
               />
             ) : (
-              <Text style={[styles.errorText, { color: theme.danger }]}>This invoice is voided.</Text>
+              <View
+                style={[
+                  styles.messageBox,
+                  {
+                    backgroundColor: theme.dangerSoft,
+                    borderColor: theme.danger,
+                  },
+                ]}
+              >
+                <Text style={[styles.errorText, { color: theme.danger }]}>
+                  This invoice is voided.
+                </Text>
+              </View>
             )}
           </AppCard>
 
-          {error ? <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text> : null}
+          {error ? (
+            <View
+              style={[
+                styles.messageBox,
+                {
+                  backgroundColor: theme.dangerSoft,
+                  borderColor: theme.danger,
+                },
+              ]}
+            >
+              <Text style={[styles.errorText, { color: theme.danger }]}>
+                {error}
+              </Text>
+            </View>
+          ) : null}
           {successMessage ? (
-            <Text style={[styles.successText, { color: theme.success }]}>{successMessage}</Text>
+            <View
+              style={[
+                styles.messageBox,
+                {
+                  backgroundColor: theme.successSoft,
+                  borderColor: theme.success,
+                },
+              ]}
+            >
+              <Text style={[styles.successText, { color: theme.success }]}>
+                {successMessage}
+              </Text>
+            </View>
           ) : null}
 
           <AppCard style={styles.sectionCard}>
-            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Customer</Text>
-            <Text style={[styles.bigText, { color: theme.textPrimary }]}>{invoice.customer_name}</Text>
-          </AppCard>
-
-          <AppCard style={styles.sectionCard}>
-            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Items</Text>
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
+              Items
+            </Text>
 
             {invoice.lines.map((line, index) => (
-              <View key={line.id} style={[styles.itemBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
+              <View
+                key={line.id}
+                style={[
+                  styles.itemBox,
+                  { backgroundColor: theme.cardMuted, borderColor: theme.border },
+                ]}
+              >
                 <View style={styles.rowBetween}>
                   <Text style={[styles.itemTitle, { color: theme.textPrimary }]}>
-                    {index + 1}. {line.product_name}
+                    {line.product_name}
                   </Text>
                   <Text style={[styles.moneyText, { color: theme.success }]}>
                     {formatMoney(line.line_total)}
                   </Text>
                 </View>
 
-                    <Text style={[styles.mutedText, { color: theme.textSecondary }]}>
-                  Qty {line.quantity}
-                  {line.unit_price > 0
-                    ? ` · Unit ${formatMoney(line.unit_price)}`
-                    : ""}
-                  {line.returned_quantity ? ` · Returned ${line.returned_quantity}` : ""}
-                </Text>
+                <View style={styles.itemMetaRow}>
+                  <Text
+                    style={[
+                      styles.itemIndex,
+                      {
+                        backgroundColor: theme.surfaceMuted,
+                        color: theme.textSecondary,
+                      },
+                    ]}
+                  >
+                    #{index + 1}
+                  </Text>
+                  <Text style={[styles.mutedText, { color: theme.textSecondary }]}>
+                    Qty {line.quantity}
+                    {line.unit_price > 0
+                      ? ` - Unit ${formatMoney(line.unit_price)}`
+                      : ""}
+                    {line.returned_quantity
+                      ? ` - Returned ${line.returned_quantity}`
+                      : ""}
+                  </Text>
+                </View>
               </View>
             ))}
           </AppCard>
 
           <AppCard style={styles.sectionCard}>
-            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Totals</Text>
+            <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
+              Totals
+            </Text>
 
-            <View style={styles.rowBetween}>
-              <Text style={[styles.label, { color: theme.textSecondary }]}>Grand total</Text>
-              <Text style={[styles.value, { color: theme.textPrimary }]}>{formatMoney(invoice.grand_total)}</Text>
+            <View
+              style={[
+                styles.totalRow,
+                styles.totalRowEmphasis,
+                {
+                  backgroundColor: theme.primarySoft,
+                  borderColor: theme.primary,
+                },
+              ]}
+            >
+              <Text style={[styles.label, { color: theme.textSecondary }]}>
+                Grand total
+              </Text>
+              <Text style={[styles.totalValue, { color: theme.primary }]}>
+                {formatMoney(invoice.grand_total)}
+              </Text>
             </View>
 
             {invoice.returned_total ? (
-              <View style={styles.rowBetween}>
-                <Text style={[styles.label, { color: theme.textSecondary }]}>Returned total</Text>
+              <View
+                style={[
+                  styles.totalRow,
+                  { backgroundColor: theme.cardMuted, borderColor: theme.border },
+                ]}
+              >
+                <Text style={[styles.label, { color: theme.textSecondary }]}>
+                  Returned total
+                </Text>
                 <Text style={[styles.value, { color: theme.textPrimary }]}>
                   {formatMoney(invoice.returned_total)}
                 </Text>
@@ -274,19 +434,48 @@ export function InvoiceDetailScreen({ route, navigation }: Props) {
             ) : null}
 
             {invoice.net_total !== undefined ? (
-              <View style={styles.rowBetween}>
-                <Text style={[styles.label, { color: theme.textSecondary }]}>Net total</Text>
-                <Text style={[styles.value, { color: theme.textPrimary }]}>{formatMoney(invoice.net_total)}</Text>
+              <View
+                style={[
+                  styles.totalRow,
+                  { backgroundColor: theme.cardMuted, borderColor: theme.border },
+                ]}
+              >
+                <Text style={[styles.label, { color: theme.textSecondary }]}>
+                  Net total
+                </Text>
+                <Text style={[styles.value, { color: theme.textPrimary }]}>
+                  {formatMoney(invoice.net_total)}
+                </Text>
               </View>
             ) : null}
 
-            <View style={styles.rowBetween}>
-              <Text style={[styles.label, { color: theme.textSecondary }]}>Paid amount</Text>
-              <Text style={[styles.value, { color: theme.textPrimary }]}>{formatMoney(invoice.paid_amount)}</Text>
+            <View
+              style={[
+                styles.totalRow,
+                { backgroundColor: theme.cardMuted, borderColor: theme.border },
+              ]}
+            >
+              <Text style={[styles.label, { color: theme.textSecondary }]}>
+                Paid amount
+              </Text>
+              <Text style={[styles.value, { color: theme.textPrimary }]}>
+                {formatMoney(invoice.paid_amount)}
+              </Text>
             </View>
 
-            <View style={styles.rowBetween}>
-              <Text style={[styles.label, { color: theme.textSecondary }]}>Balance due</Text>
+            <View
+              style={[
+                styles.totalRow,
+                styles.totalRowEmphasis,
+                {
+                  backgroundColor: theme.warningSoft,
+                  borderColor: theme.warning,
+                },
+              ]}
+            >
+              <Text style={[styles.label, { color: theme.textSecondary }]}>
+                Balance due
+              </Text>
               <Text style={[styles.balanceText, { color: theme.warning }]}>
                 {formatMoney(invoice.balance_due)}
               </Text>
@@ -301,41 +490,52 @@ export function InvoiceDetailScreen({ route, navigation }: Props) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#f8fafc",
   },
   scrollContent: {
-    padding: 16,
+    padding: 18,
     paddingBottom: 40,
   },
   wrapper: {
     width: "100%",
-    maxWidth: 900,
+    maxWidth: 860,
     alignSelf: "center",
-    gap: 14,
+    gap: 16,
   },
   headerCard: {
-    gap: 12,
+    gap: 14,
+    borderRadius: 20,
   },
   sectionCard: {
-    gap: 10,
+    gap: 12,
+    borderRadius: 20,
+  },
+  headerTop: {
+    gap: 2,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "900",
-    color: "#0f172a",
   },
-  bigText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#0f172a",
+  customerName: {
+    fontSize: 17,
+    fontWeight: "900",
+  },
+  customerPanel: {
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 14,
+    gap: 4,
+  },
+  metaLabel: {
+    fontSize: 12,
+    fontWeight: "900",
+    textTransform: "uppercase",
   },
   itemBox: {
     borderWidth: 1,
-    borderColor: "#e2e8f0",
-    borderRadius: 14,
-    padding: 12,
-    gap: 6,
-    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    padding: 14,
+    gap: 8,
   },
   rowBetween: {
     flexDirection: "row",
@@ -344,191 +544,86 @@ const styles = StyleSheet.create({
   },
   itemTitle: {
     flex: 1,
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "900",
-    color: "#0f172a",
+    lineHeight: 21,
   },
   moneyText: {
     fontSize: 14,
     fontWeight: "900",
-    color: "#166534",
+  },
+  itemMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flexWrap: "wrap",
+  },
+  itemIndex: {
+    borderRadius: 999,
+    overflow: "hidden",
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    fontSize: 12,
+    fontWeight: "900",
   },
   mutedText: {
     fontSize: 13,
-    color: "#64748b",
+    lineHeight: 19,
+    flexShrink: 1,
   },
   label: {
     fontSize: 14,
-    color: "#64748b",
+    fontWeight: "800",
   },
   value: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "900",
-    color: "#0f172a",
   },
   balanceText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "900",
-    color: "#b45309",
+  },
+  totalValue: {
+    fontSize: 17,
+    fontWeight: "900",
+  },
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 14,
+  },
+  totalRowEmphasis: {
+    paddingVertical: 16,
   },
   statusPill: {
     alignSelf: "flex-start",
     borderRadius: 999,
-    backgroundColor: "#e0f2fe",
+    borderWidth: 1,
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
   statusText: {
-    color: "#075985",
     fontWeight: "900",
     fontSize: 12,
   },
+  messageBox: {
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  dangerButton: {
+    minHeight: 56,
+  },
   errorText: {
-    color: "#b91c1c",
-    fontWeight: "700",
+    fontWeight: "800",
+    lineHeight: 19,
   },
   successText: {
-    color: "#166534",
-    fontWeight: "700",
+    fontWeight: "800",
+    lineHeight: 19,
   },
 });
-// import React, { useEffect, useState } from "react";
-// import { SafeAreaView, ScrollView, StyleSheet, Text, View, Alert, Platform } from "react-native";
-// import { AppCard, LoadingState } from "../../components/ui";
-// import { AppButton } from "../../components/AppButton";
-// import { getInvoiceById } from "../../database/invoicesRepository";
-// import type { InvoiceListItem } from "../../types/invoice";
-
-// function formatMoney(value: number) {
-//   return `Rs ${Number(value || 0).toLocaleString("en-PK")}`;
-// }
-
-// export function InvoiceDetailScreen({ route }: any) {
-//   const { invoiceId } = route.params ?? {};
-//   const [invoice, setInvoice] = useState<any | null>(null);
-//   const [loading, setLoading] = useState(true);
-
-//   async function load() {
-//     try {
-//       setLoading(true);
-//       const inv = await getInvoiceById(invoiceId);
-//       setInvoice(inv);
-//     } catch (err) {
-//       Alert.alert("Error", err instanceof Error ? err.message : String(err));
-//     } finally {
-//       setLoading(false);
-//     }
-//   }
-
-//   useEffect(() => { load(); }, [invoiceId]);
-
-//   async function shareInvoice() {
-//     if (!invoice) return;
-
-//     const html = `
-//       <html>
-//       <head><meta charset="utf-8"><title>Invoice ${invoice.invoice_no}</title></head>
-//       <body>
-//         <h1>Invoice ${invoice.invoice_no}</h1>
-//         <p>${new Date(invoice.created_at).toLocaleString()}</p>
-//         <p>Customer: ${invoice.customer_name ?? "Walk-in"}</p>
-//         <table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; width:100%">
-//           <thead><tr><th>Item</th><th>Qty</th><th>Unit</th><th>Line total</th></tr></thead>
-//           <tbody>
-//             ${((invoice.items || []) as any[]).map(i => `<tr><td>${i.product_name_snapshot}</td><td>${i.quantity}</td><td>${i.unit_price}</td><td>${i.line_total}</td></tr>`).join("")}
-//           </tbody>
-//         </table>
-//         <h3>Grand total: ${invoice.grand_total}</h3>
-//         <p>Paid: ${invoice.paid_amount} · Balance: ${invoice.balance_due} · Status: ${invoice.payment_status}</p>
-//       </body>
-//       </html>
-//     `;
-
-//     if (Platform.OS === "web") {
-//       const win = window.open("", "_blank");
-//       if (!win) {
-//         Alert.alert("Error", "Unable to open print window.");
-//         return;
-//       }
-//       win.document.write(html);
-//       win.document.close();
-//       win.focus();
-//       win.print();
-//       return;
-//     }
-
-//     // Mobile: try to use expo-print and expo-sharing if available
-//     try {
-//     // dynamic import so web doesn't fail
-//     // @ts-ignore: optional dependency
-//     const Print = await import("expo-print");
-//       const result = await Print.printAsync({ html });
-
-//       try {
-//         // @ts-ignore: optional dependency
-//         const Sharing = await import("expo-sharing");
-//         if (result.uri && Sharing.isAvailableAsync) {
-//           const available = await Sharing.isAvailableAsync();
-//           if (available) {
-//             await Sharing.shareAsync(result.uri);
-//           }
-//         }
-//       } catch (shareErr) {
-//         // sharing not available, ignore
-//       }
-//     } catch (err) {
-//       Alert.alert("Share", "Sharing not available on this platform. (expo-print/expo-sharing not installed)");
-//     }
-//   }
-
-//   if (loading) return <LoadingState message="Loading invoice..." />;
-//   if (!invoice) return (
-//     <SafeAreaView style={styles.screen}><View style={styles.wrapper}><Text>Invoice not found.</Text></View></SafeAreaView>
-//   );
-
-//   return (
-//     <SafeAreaView style={styles.screen}>
-//       <ScrollView contentContainerStyle={styles.scrollContent}>
-//         <View style={styles.wrapper}>
-//           <AppCard>
-//             <Text style={styles.invoiceNo}>{invoice.invoice_no}</Text>
-//             <Text style={styles.meta}>{new Date(invoice.created_at).toLocaleString()}</Text>
-//             <Text style={styles.meta}>Customer: {invoice.customer_name ?? "Walk-in"}</Text>
-
-//             <View style={{ marginTop: 12 }}>
-//               {(invoice.items || []).map((it: any) => (
-//                 <View key={it.id} style={styles.itemRow}>
-//                   <Text style={styles.itemName}>{it.product_name_snapshot}</Text>
-//                   <Text style={styles.itemMeta}>{it.quantity} × {formatMoney(it.unit_price)} = {formatMoney(it.line_total)}</Text>
-//                 </View>
-//               ))}
-//             </View>
-
-//             <View style={styles.totals}>
-//               <Text>Grand total: {formatMoney(invoice.grand_total)}</Text>
-//               <Text>Paid: {formatMoney(invoice.paid_amount)}</Text>
-//               <Text>Balance: {formatMoney(invoice.balance_due)}</Text>
-//               <Text>Status: {invoice.payment_status}</Text>
-//             </View>
-
-//             <AppButton title="Share Invoice" onPress={shareInvoice} />
-//           </AppCard>
-//         </View>
-//       </ScrollView>
-//     </SafeAreaView>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   screen: { flex: 1, backgroundColor: "#F8FAFC" },
-//   scrollContent: { padding: 16 },
-//   wrapper: { width: "100%", maxWidth: 900, alignSelf: "center" },
-//   invoiceNo: { fontSize: 20, fontWeight: "900" },
-//   meta: { color: "#64748B", marginTop: 4 },
-//   itemRow: { marginTop: 8, padding: 8, backgroundColor: "#fff", borderRadius: 8 },
-//   itemName: { fontWeight: "800" },
-//   itemMeta: { color: "#64748B" },
-//   totals: { marginTop: 12 }
-// });
-
-// export default InvoiceDetailScreen;
