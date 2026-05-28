@@ -40,6 +40,10 @@ function parseNumber(value: string): number {
   return parsed;
 }
 
+function formatMoney(value: number): string {
+  return `Rs ${Number(value || 0).toLocaleString("en-PK")}`;
+}
+
 export function UdhaarScreen() {
   const { theme } = useAppTheme();
   const [customers, setCustomers] = useState<UdhaarCustomer[]>([]);
@@ -192,7 +196,7 @@ export function UdhaarScreen() {
             <View style={styles.summaryRow}>
               <View style={[styles.summaryBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
                 <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>Total udhaar</Text>
-                <Text style={[styles.summaryValue, { color: theme.textPrimary }]}>Rs {totalUdhaar}</Text>
+                <Text style={[styles.summaryValue, { color: theme.warning }]}>{formatMoney(totalUdhaar)}</Text>
                 <Text style={[styles.summaryHint, { color: theme.textMuted }]}>Customer balance</Text>
               </View>
 
@@ -223,7 +227,11 @@ export function UdhaarScreen() {
                         styles.customerOption,
                         { backgroundColor: theme.card, borderColor: theme.border },
                         selectedCustomerId === customer.id &&
-                          { backgroundColor: theme.primarySoft, borderColor: theme.primary },
+                          {
+                            backgroundColor: theme.primarySoft,
+                            borderColor: theme.primary,
+                            borderWidth: 2,
+                          },
                       ]}
                     >
                       <View style={styles.customerTopRow}>
@@ -252,7 +260,7 @@ export function UdhaarScreen() {
                       </Text>
 
                       <Text style={[styles.customerBalance, { color: theme.textPrimary }]}>
-                        Rs {customer.current_balance}
+                        {formatMoney(customer.current_balance)}
                       </Text>
                     </Pressable>
                   ))}
@@ -276,8 +284,8 @@ export function UdhaarScreen() {
                         </View>
                         <View style={[styles.selectedBalancePill, { backgroundColor: theme.card, borderColor: theme.border }]}>
                           <Text style={[styles.selectedBalanceLabel, { color: theme.textMuted }]}>Balance</Text>
-                          <Text style={[styles.selectedBalanceValue, { color: theme.textPrimary }]}>
-                            Rs {selectedCustomer.current_balance}
+                          <Text style={[styles.selectedBalanceValue, { color: theme.warning }]}>
+                            {formatMoney(selectedCustomer.current_balance)}
                           </Text>
                         </View>
                       </View>
@@ -298,10 +306,16 @@ export function UdhaarScreen() {
                       onChangeText={setNote}
                     />
 
-                    {error ? <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text> : null}
+                    {error ? (
+                      <View style={[styles.messageBox, { backgroundColor: theme.dangerSoft, borderColor: theme.danger }]}>
+                        <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text>
+                      </View>
+                    ) : null}
 
                     {successMessage ? (
-                      <Text style={[styles.successText, { color: theme.success }]}>{successMessage}</Text>
+                      <View style={[styles.messageBox, { backgroundColor: theme.successSoft, borderColor: theme.success }]}>
+                        <Text style={[styles.successText, { color: theme.success }]}>{successMessage}</Text>
+                      </View>
                     ) : null}
 
                     <AppButton
@@ -333,9 +347,12 @@ export function UdhaarScreen() {
                           <View
                             style={[
                               styles.ledgerDot,
-                              entry.type === "payment"
-                                ? styles.paymentDot
-                                : styles.invoiceDot,
+                              {
+                                backgroundColor:
+                                  entry.type === "payment"
+                                    ? theme.success
+                                    : theme.danger,
+                              },
                             ]}
                           />
 
@@ -358,8 +375,8 @@ export function UdhaarScreen() {
                               : { color: theme.danger },
                           ]}
                         >
-                          {entry.type === "payment" ? "-" : "+"} Rs{" "}
-                          {entry.amount}
+                          {entry.type === "payment" ? "-" : "+"}{" "}
+                          {formatMoney(entry.amount)}
                         </Text>
                       </View>
                     ))}
@@ -377,21 +394,20 @@ export function UdhaarScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F3F6FA",
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 36,
+    padding: 18,
+    paddingBottom: 40,
   },
   wrapper: {
     width: "100%",
-    maxWidth: 900,
+    maxWidth: 860,
     alignSelf: "center",
     gap: 16,
   },
   headerCard: {
-    borderColor: "#CBD5E1",
-    borderRadius: 16,
+    borderRadius: 20,
+    gap: 14,
   },
   summaryRow: {
     flexDirection: "row",
@@ -401,15 +417,12 @@ const styles = StyleSheet.create({
   summaryBox: {
     flex: 1,
     minWidth: 180,
-    backgroundColor: "#F8FAFC",
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#D8E0EA",
   },
   summaryLabel: {
     fontSize: 12,
-    color: "#64748B",
     marginBottom: 6,
     fontWeight: "800",
     textTransform: "uppercase",
@@ -417,21 +430,19 @@ const styles = StyleSheet.create({
   summaryValue: {
     fontSize: 26,
     fontWeight: "900",
-    color: "#0F172A",
   },
   summaryHint: {
-    color: "#64748B",
     fontSize: 12,
     marginTop: 4,
     fontWeight: "700",
   },
   sectionCard: {
-    borderRadius: 16,
+    borderRadius: 20,
+    gap: 2,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "900",
-    color: "#0F172A",
     marginBottom: 16,
   },
   customerGrid: {
@@ -442,16 +453,9 @@ const styles = StyleSheet.create({
   customerOption: {
     minWidth: 220,
     flexGrow: 1,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#D8E0EA",
     padding: 16,
-  },
-  customerOptionActive: {
-    backgroundColor: "#EFF6FF",
-    borderColor: "#2563EB",
-    borderWidth: 2,
   },
   customerTopRow: {
     flexDirection: "row",
@@ -464,55 +468,41 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     fontWeight: "900",
-    color: "#0F172A",
-  },
-  customerNameActive: {
-    color: "#1D4ED8",
   },
   customerMeta: {
     fontSize: 13,
-    color: "#475569",
     marginBottom: 10,
     fontWeight: "700",
   },
   customerBalance: {
     fontSize: 22,
     fontWeight: "900",
-    color: "#0F172A",
   },
   dueBadge: {
-    backgroundColor: "#FEF2F2",
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderWidth: 1,
-    borderColor: "#FECACA",
   },
   dueBadgeText: {
-    color: "#B91C1C",
     fontSize: 11,
     fontWeight: "900",
     textTransform: "uppercase",
   },
   clearBadge: {
-    backgroundColor: "#ECFDF5",
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderWidth: 1,
-    borderColor: "#A7F3D0",
   },
   clearBadgeText: {
-    color: "#15803D",
     fontSize: 11,
     fontWeight: "900",
     textTransform: "uppercase",
   },
   selectedCustomerBox: {
-    backgroundColor: "#F8FAFC",
     borderWidth: 1,
-    borderColor: "#D8E0EA",
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     marginBottom: 16,
   },
@@ -521,13 +511,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: 12,
+    flexWrap: "wrap",
   },
   selectedCustomerInfo: {
     flex: 1,
   },
   selectedCustomerLabel: {
     fontSize: 12,
-    color: "#64748B",
     marginBottom: 4,
     fontWeight: "800",
     textTransform: "uppercase",
@@ -535,58 +525,54 @@ const styles = StyleSheet.create({
   selectedCustomerName: {
     fontSize: 18,
     fontWeight: "900",
-    color: "#0F172A",
   },
   selectedBalancePill: {
-    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 12,
     paddingVertical: 10,
     alignItems: "flex-end",
   },
   selectedBalanceLabel: {
-    color: "#64748B",
     fontSize: 11,
     fontWeight: "800",
     textTransform: "uppercase",
   },
   selectedBalanceValue: {
-    color: "#0F172A",
     fontSize: 16,
     fontWeight: "900",
     marginTop: 2,
   },
+  messageBox: {
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 14,
+  },
   errorText: {
     fontSize: 13,
-    color: "#DC2626",
-    fontWeight: "700",
-    marginBottom: 14,
+    fontWeight: "800",
+    lineHeight: 19,
   },
   successText: {
     fontSize: 13,
-    color: "#15803D",
-    fontWeight: "700",
-    marginBottom: 14,
+    fontWeight: "800",
+    lineHeight: 19,
   },
   paymentButton: {
     marginTop: 4,
-    backgroundColor: "#0F766E",
   },
   mutedText: {
     fontSize: 14,
-    color: "#64748B",
     lineHeight: 21,
   },
   ledgerList: {
     gap: 10,
   },
   ledgerItem: {
-    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#D8E0EA",
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 14,
     flexDirection: "row",
     alignItems: "flex-start",
@@ -604,30 +590,21 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     marginTop: 5,
   },
-  invoiceDot: {
-    backgroundColor: "#DC2626",
-  },
-  paymentDot: {
-    backgroundColor: "#16A34A",
-  },
   ledgerTextBox: {
     flex: 1,
   },
   ledgerTitle: {
     fontSize: 15,
     fontWeight: "900",
-    color: "#0F172A",
     marginBottom: 3,
   },
   ledgerDescription: {
     fontSize: 13,
-    color: "#64748B",
     marginBottom: 4,
     lineHeight: 19,
   },
   ledgerDate: {
     fontSize: 12,
-    color: "#94A3B8",
   },
   ledgerAmount: {
     fontSize: 15,
@@ -636,11 +613,5 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 6,
-  },
-  invoiceAmount: {
-    color: "#B91C1C",
-  },
-  paymentAmount: {
-    color: "#15803D",
   },
 });

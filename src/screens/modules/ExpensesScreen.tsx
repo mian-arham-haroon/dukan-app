@@ -57,6 +57,10 @@ function parseNumber(value: string): number {
   return parsed;
 }
 
+function formatMoney(value: number): string {
+  return `Rs ${Number(value || 0).toLocaleString("en-PK")}`;
+}
+
 function formatEntryType(type: string): string {
   if (type === "invoice_payment") return "Invoice payment";
   if (type === "sale_payment") return "Sale payment";
@@ -239,19 +243,19 @@ export function ExpensesScreen() {
             <View style={styles.summaryGrid}>
               <View style={[styles.summaryBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
                 <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>Today cash in</Text>
-                <Text style={[styles.summaryValue, { color: theme.textPrimary }]}>Rs {summary.totalCashIn}</Text>
+                <Text style={[styles.summaryValue, { color: theme.success }]}>{formatMoney(summary.totalCashIn)}</Text>
                 <Text style={[styles.summaryHint, { color: theme.textMuted }]}>Collected cash</Text>
               </View>
 
               <View style={[styles.summaryBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
                 <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>Today cash out</Text>
-                <Text style={[styles.summaryValue, { color: theme.textPrimary }]}>Rs {summary.totalCashOut}</Text>
+                <Text style={[styles.summaryValue, { color: theme.danger }]}>{formatMoney(summary.totalCashOut)}</Text>
                 <Text style={[styles.summaryHint, { color: theme.textMuted }]}>Paid expenses</Text>
               </View>
 
               <View style={[styles.summaryBox, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
                 <Text style={[styles.summaryLabel, { color: theme.textMuted }]}>Expected cash</Text>
-                <Text style={[styles.summaryValue, { color: theme.textPrimary }]}>Rs {summary.expectedCash}</Text>
+                <Text style={[styles.summaryValue, { color: theme.primary }]}>{formatMoney(summary.expectedCash)}</Text>
                 <Text style={[styles.summaryHint, { color: theme.textMuted }]}>Register balance</Text>
               </View>
             </View>
@@ -264,14 +268,14 @@ export function ExpensesScreen() {
               <View style={styles.closeInfoRow}>
                 <Text style={[styles.closeInfoLabel, { color: theme.textSecondary }]}>Expected cash</Text>
                 <Text style={[styles.closeInfoValue, { color: theme.textPrimary }]}>
-                  Rs {summary.expectedCash}
+                  {formatMoney(summary.expectedCash)}
                 </Text>
               </View>
 
               <View style={styles.closeInfoRow}>
                 <Text style={[styles.closeInfoLabel, { color: theme.textSecondary }]}>Actual cash entered</Text>
                 <Text style={[styles.closeInfoValue, { color: theme.textPrimary }]}>
-                  Rs {actualCash.trim() ? parsedActualCash : 0}
+                  {formatMoney(actualCash.trim() ? parsedActualCash : 0)}
                 </Text>
               </View>
 
@@ -280,15 +284,18 @@ export function ExpensesScreen() {
                 <Text
                   style={[
                     styles.closeInfoValue,
-                    liveDifference === 0
-                      ? styles.neutralText
-                      : liveDifference > 0
-                      ? styles.goodText
-                      : styles.badText,
+                    {
+                      color:
+                        liveDifference === 0
+                          ? theme.textPrimary
+                          : liveDifference > 0
+                          ? theme.success
+                          : theme.danger,
+                    },
                   ]}
                 >
-                  {liveDifference >= 0 ? "+" : "-"} Rs{" "}
-                  {Math.abs(liveDifference)}
+                  {liveDifference >= 0 ? "+" : "-"}{" "}
+                  {formatMoney(Math.abs(liveDifference))}
                 </Text>
               </View>
             </View>
@@ -358,15 +365,22 @@ export function ExpensesScreen() {
               onChangeText={setDescription}
             />
 
-            {error ? <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text> : null}
+            {error ? (
+              <View style={[styles.messageBox, { backgroundColor: theme.dangerSoft, borderColor: theme.danger }]}>
+                <Text style={[styles.errorText, { color: theme.danger }]}>{error}</Text>
+              </View>
+            ) : null}
 
             {successMessage ? (
-              <Text style={[styles.successText, { color: theme.success }]}>{successMessage}</Text>
+              <View style={[styles.messageBox, { backgroundColor: theme.successSoft, borderColor: theme.success }]}>
+                <Text style={[styles.successText, { color: theme.success }]}>{successMessage}</Text>
+              </View>
             ) : null}
 
             <AppButton
               title={savingExpense ? "Saving expense..." : "Save expense"}
               onPress={handleSaveExpense}
+              variant="danger"
               style={styles.expenseButton}
               fullWidth
             />
@@ -391,11 +405,14 @@ export function ExpensesScreen() {
                       <View
                         style={[
                           styles.cashbookDot,
-                          close.difference === 0
-                            ? styles.neutralDot
-                            : close.difference > 0
-                            ? styles.cashInDot
-                            : styles.cashOutDot,
+                          {
+                            backgroundColor:
+                              close.difference === 0
+                                ? theme.textMuted
+                                : close.difference > 0
+                                ? theme.success
+                                : theme.danger,
+                          },
                         ]}
                       />
 
@@ -425,8 +442,8 @@ export function ExpensesScreen() {
                           : { color: theme.danger, backgroundColor: theme.dangerSoft },
                       ]}
                     >
-                      {close.difference >= 0 ? "+" : "-"} Rs{" "}
-                      {Math.abs(close.difference)}
+                      {close.difference >= 0 ? "+" : "-"}{" "}
+                      {formatMoney(Math.abs(close.difference))}
                     </Text>
                   </View>
                 ))}
@@ -437,7 +454,7 @@ export function ExpensesScreen() {
           <AppCard style={styles.sectionCard}>
             <View style={styles.sectionTopRow}>
               <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Recent expenses</Text>
-              <Text style={[styles.sectionMeta, { backgroundColor: theme.primarySoft, color: theme.primary }]}>Rs {summary.expenseTotal}</Text>
+              <Text style={[styles.sectionMeta, { backgroundColor: theme.dangerSoft, color: theme.danger }]}>{formatMoney(summary.expenseTotal)}</Text>
             </View>
 
             {expenses.length === 0 ? (
@@ -450,7 +467,7 @@ export function ExpensesScreen() {
                 {expenses.map((entry) => (
                   <View key={entry.id} style={[styles.entryItem, { backgroundColor: theme.cardMuted, borderColor: theme.border }]}>
                     <View style={styles.entryLeft}>
-                      <View style={styles.expenseDot} />
+                      <View style={[styles.expenseDot, { backgroundColor: theme.danger }]} />
 
                       <View style={styles.entryTextBox}>
                         <Text style={[styles.entryTitle, { color: theme.textPrimary }]}>{entry.description}</Text>
@@ -461,7 +478,7 @@ export function ExpensesScreen() {
                     </View>
 
                     <Text style={[styles.expenseAmount, { color: theme.danger, backgroundColor: theme.dangerSoft }]}>
-                      - Rs {entry.amount_out}
+                      - {formatMoney(entry.amount_out)}
                     </Text>
                   </View>
                 ))}
@@ -493,7 +510,11 @@ export function ExpensesScreen() {
                         <View
                           style={[
                             styles.cashbookDot,
-                            isCashIn ? styles.cashInDot : styles.cashOutDot,
+                            {
+                              backgroundColor: isCashIn
+                                ? theme.success
+                                : theme.danger,
+                            },
                           ]}
                         />
 
@@ -520,8 +541,8 @@ export function ExpensesScreen() {
                             : { color: theme.danger, backgroundColor: theme.dangerSoft },
                         ]}
                       >
-                        {isCashIn ? "+" : "-"} Rs{" "}
-                        {isCashIn ? entry.amount_in : entry.amount_out}
+                        {isCashIn ? "+" : "-"}{" "}
+                        {formatMoney(isCashIn ? entry.amount_in : entry.amount_out)}
                       </Text>
                     </View>
                   );
@@ -538,21 +559,20 @@ export function ExpensesScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F3F6FA",
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 36,
+    padding: 18,
+    paddingBottom: 40,
   },
   wrapper: {
     width: "100%",
-    maxWidth: 900,
+    maxWidth: 860,
     alignSelf: "center",
     gap: 16,
   },
   headerCard: {
-    borderColor: "#CBD5E1",
-    borderRadius: 16,
+    borderRadius: 20,
+    gap: 14,
   },
   summaryGrid: {
     flexDirection: "row",
@@ -562,15 +582,12 @@ const styles = StyleSheet.create({
   summaryBox: {
     flexGrow: 1,
     minWidth: 180,
-    backgroundColor: "#F8FAFC",
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#D8E0EA",
   },
   summaryLabel: {
     fontSize: 12,
-    color: "#64748B",
     marginBottom: 6,
     fontWeight: "800",
     textTransform: "uppercase",
@@ -578,16 +595,15 @@ const styles = StyleSheet.create({
   summaryValue: {
     fontSize: 26,
     fontWeight: "900",
-    color: "#0F172A",
   },
   summaryHint: {
-    color: "#64748B",
     fontSize: 12,
     marginTop: 4,
     fontWeight: "700",
   },
   sectionCard: {
-    borderRadius: 16,
+    borderRadius: 20,
+    gap: 2,
   },
   sectionTopRow: {
     flexDirection: "row",
@@ -597,15 +613,13 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "900",
-    color: "#0F172A",
+    flex: 1,
   },
   sectionMeta: {
     fontSize: 13,
     fontWeight: "900",
-    color: "#1D4ED8",
-    backgroundColor: "#EFF6FF",
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 6,
@@ -613,14 +627,11 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontSize: 14,
     fontWeight: "800",
-    color: "#334155",
     marginBottom: 8,
   },
   closeInfoBox: {
-    backgroundColor: "#F8FAFC",
     borderWidth: 1,
-    borderColor: "#D8E0EA",
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     marginBottom: 16,
     gap: 8,
@@ -629,20 +640,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     gap: 12,
+    flexWrap: "wrap",
   },
   closeInfoLabel: {
-    color: "#64748B",
     fontSize: 14,
     fontWeight: "800",
   },
   closeInfoValue: {
-    color: "#0F172A",
     fontSize: 15,
     fontWeight: "900",
   },
   closeButton: {
     marginTop: 4,
-    backgroundColor: "#0F766E",
   },
   categoryGrid: {
     flexDirection: "row",
@@ -651,47 +660,41 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   categoryChip: {
-    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#CBD5E1",
     borderRadius: 999,
     paddingHorizontal: 16,
     paddingVertical: 11,
   },
-  categoryChipActive: {
-    borderWidth: 2,
-  },
   categoryChipText: {
     fontSize: 13,
     fontWeight: "800",
-    color: "#334155",
-  },
-  categoryChipTextActive: {
   },
   expenseButton: {
     marginTop: 4,
-    backgroundColor: "#B91C1C",
+  },
+  messageBox: {
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 14,
   },
   errorText: {
-    color: "#DC2626",
     fontSize: 13,
-    fontWeight: "700",
-    marginBottom: 14,
+    fontWeight: "800",
+    lineHeight: 19,
   },
   successText: {
-    color: "#15803D",
     fontSize: 13,
-    fontWeight: "700",
-    marginBottom: 14,
+    fontWeight: "800",
+    lineHeight: 19,
   },
   entryList: {
     gap: 10,
   },
   entryItem: {
-    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#D8E0EA",
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 14,
     flexDirection: "row",
     justifyContent: "space-between",
@@ -709,24 +712,20 @@ const styles = StyleSheet.create({
   entryTitle: {
     fontSize: 15,
     fontWeight: "900",
-    color: "#0F172A",
     marginBottom: 4,
   },
   entryDescription: {
     fontSize: 13,
-    color: "#64748B",
     marginBottom: 4,
     lineHeight: 19,
   },
   entryDate: {
     fontSize: 12,
-    color: "#94A3B8",
   },
   expenseDot: {
     width: 10,
     height: 10,
     borderRadius: 999,
-    backgroundColor: "#DC2626",
     marginTop: 5,
   },
   cashbookDot: {
@@ -735,20 +734,9 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     marginTop: 5,
   },
-  cashInDot: {
-    backgroundColor: "#16A34A",
-  },
-  cashOutDot: {
-    backgroundColor: "#DC2626",
-  },
-  neutralDot: {
-    backgroundColor: "#64748B",
-  },
   expenseAmount: {
     fontSize: 15,
     fontWeight: "900",
-    color: "#B91C1C",
-    backgroundColor: "#FEF2F2",
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 6,
@@ -760,27 +748,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
-  cashInText: {
-    color: "#15803D",
-    backgroundColor: "#ECFDF5",
-  },
-  cashOutText: {
-    color: "#B91C1C",
-    backgroundColor: "#FEF2F2",
-  },
-  neutralText: {
-    color: "#0F172A",
-    backgroundColor: "#F1F5F9",
-  },
-  goodText: {
-    color: "#15803D",
-  },
-  badText: {
-    color: "#B91C1C",
-  },
   mutedText: {
     fontSize: 14,
-    color: "#64748B",
     lineHeight: 21,
   },
 });
