@@ -166,7 +166,12 @@ export function InvoicesScreen({ navigation }: Props) {
           </AppCard>
 
           <AppCard style={styles.formCard}>
-            <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Create invoice</Text>
+            <View style={styles.formTitleBlock}>
+              <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Create invoice</Text>
+              <Text style={[styles.cardSubtitle, { color: theme.textSecondary }]}>
+                Select a customer, add products, then choose the payment status.
+              </Text>
+            </View>
 
             <Text style={[styles.fieldLabel, { color: theme.textSecondary }]}>Customer</Text>
             <View style={styles.optionGrid}>
@@ -198,18 +203,18 @@ export function InvoicesScreen({ navigation }: Props) {
 
             <View style={styles.addItemRow}>
               <View style={styles.quantityBox}><AppInput label="Quantity" placeholder="1" value={quantity} onChangeText={setQuantity} keyboardType="numeric" /></View>
-              <Pressable style={styles.addItemButton} onPress={handleAddItemToCart}><Text style={styles.addItemButtonText}>Add item</Text></Pressable>
+              <Pressable style={[styles.addItemButton, { backgroundColor: theme.success, borderColor: theme.success }]} onPress={handleAddItemToCart}><Text style={[styles.addItemButtonText, { color: theme.primaryText }]}>Add item</Text></Pressable>
             </View>
 
             <Text style={[styles.fieldLabel, { color: theme.textSecondary }]}>Invoice items</Text>
             {cartLines.length === 0 ? (
               <View style={[styles.warningBox, { backgroundColor: theme.warningSoft, borderColor: theme.warning }]}><Text style={[styles.warningText, { color: theme.warning }]}>No items added yet. Select product, enter quantity, then press Add item.</Text></View>
             ) : (
-              <View style={[styles.cartBox, { borderColor: theme.border }]}>{cartLines.map((line) => (
+              <View style={[styles.cartBox, { backgroundColor: theme.card, borderColor: theme.border }]}>{cartLines.map((line) => (
                 <View key={line.productId} style={[styles.cartLine, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
                   <View style={styles.cartLineInfo}><Text style={[styles.cartLineTitle, { color: theme.textPrimary }]}>{line.productName}</Text><Text style={[styles.cartLineMeta, { color: theme.textSecondary }]}>Rs {line.unitPrice} x {line.quantity}</Text></View>
                   <Text style={[styles.cartLineTotal, { color: theme.textPrimary }]}>Rs {line.lineTotal}</Text>
-                  <Pressable style={styles.removeButton} onPress={() => handleRemoveCartLine(line.productId)}><Text style={styles.removeButtonText}>Remove</Text></Pressable>
+                  <Pressable style={[styles.removeButton, { backgroundColor: theme.dangerSoft, borderColor: theme.danger }]} onPress={() => handleRemoveCartLine(line.productId)}><Text style={[styles.removeButtonText, { color: theme.danger }]}>Remove</Text></Pressable>
                 </View>
               ))}</View>
             )}
@@ -257,7 +262,10 @@ export function InvoicesScreen({ navigation }: Props) {
             <EmptyState title="No invoices yet" message="Create your first invoice using the form above." />
           ) : (
             <View style={styles.listSection}>
-              <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Recent invoices</Text>
+              <View style={styles.sectionHeader}>
+                <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>Recent invoices</Text>
+                <Text style={[styles.sectionCount, { color: theme.textMuted }]}>{invoices.length} invoices</Text>
+              </View>
               {invoices.map((invoice) => (
                 <AppCard key={invoice.id} style={styles.invoiceCard}>
                   <View style={styles.invoiceTopRow}>
@@ -299,59 +307,63 @@ export function InvoicesScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "#F3F6FA" },
-  scrollContent: { padding: 20, paddingBottom: 36 },
-  wrapper: { width: "100%", maxWidth: 900, alignSelf: "center", gap: 16 },
-  headerCard: { borderColor: "#CBD5E1", borderRadius: 16 },
-  formCard: { borderRadius: 16 },
-  fieldLabel: { fontSize: 13, color: "#334155", marginTop: 14, fontWeight: "800" },
-  cardTitle: { fontSize: 20, fontWeight: "900", color: "#0F172A", marginBottom: 12 },
+  screen: { flex: 1 },
+  scrollContent: { padding: 18, paddingBottom: 38 },
+  wrapper: { width: "100%", maxWidth: 860, alignSelf: "center", gap: 18 },
+  headerCard: { borderRadius: 22 },
+  formCard: { borderRadius: 22 },
+  formTitleBlock: { marginBottom: 6 },
+  fieldLabel: { fontSize: 13, marginTop: 16, fontWeight: "900", textTransform: "uppercase" },
+  cardTitle: { fontSize: 22, fontWeight: "900", marginBottom: 5 },
+  cardSubtitle: { fontSize: 14, lineHeight: 21 },
   summaryRow: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
-  summaryBox: { flex: 1, minWidth: 180, backgroundColor: "#F8FAFC", borderRadius: 12, padding: 16, borderWidth: 1, borderColor: "#D8E0EA" },
-  summaryLabel: { fontSize: 12, color: "#64748B", marginBottom: 6, fontWeight: "800", textTransform: "uppercase" },
-  summaryValue: { fontSize: 26, fontWeight: "900", color: "#0F172A" },
-  summaryHint: { color: "#64748B", fontSize: 12, marginTop: 4, fontWeight: "700" },
+  summaryBox: { flex: 1, minWidth: 180, borderRadius: 16, padding: 16, borderWidth: 1 },
+  summaryLabel: { fontSize: 12, marginBottom: 6, fontWeight: "900", textTransform: "uppercase" },
+  summaryValue: { fontSize: 28, fontWeight: "900" },
+  summaryHint: { fontSize: 12, marginTop: 4, fontWeight: "700" },
   optionGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 8 },
-  optionCard: { minWidth: 160, flexGrow: 1, padding: 14, borderRadius: 12, backgroundColor: "#FFF", borderWidth: 1, borderColor: "#D8E0EA", marginBottom: 8 },
-  optionCardActive: { backgroundColor: "#EEF6FF", borderColor: "#2563EB" },
-  optionTitle: { fontWeight: "900", color: "#0F172A", fontSize: 15 },
-  optionTitleActive: { color: "#1D4ED8" },
-  optionMeta: { color: "#475569", marginTop: 6, fontSize: 13, fontWeight: "700" },
-  addItemRow: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 8, marginTop: 12 },
-  quantityBox: { width: 120, minWidth: 120 },
-  addItemButton: { backgroundColor: "#0F766E", paddingHorizontal: 16, paddingVertical: 12, borderRadius: 10 },
-  addItemButtonText: { color: "#FFF", fontWeight: "800" },
-  cartBox: { marginTop: 8, borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, overflow: "hidden" },
-  cartLine: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 12, gap: 10, backgroundColor: "#FFF", borderBottomWidth: 1, borderBottomColor: "#F1F5F9" },
+  optionCard: { minWidth: 160, flexGrow: 1, padding: 15, borderRadius: 16, borderWidth: 1, marginBottom: 8 },
+  optionCardActive: {},
+  optionTitle: { fontWeight: "900", fontSize: 15 },
+  optionTitleActive: {},
+  optionMeta: { marginTop: 7, fontSize: 13, fontWeight: "700", lineHeight: 18 },
+  addItemRow: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", gap: 10, marginTop: 14 },
+  quantityBox: { width: 132, minWidth: 132 },
+  addItemButton: { minHeight: 52, justifyContent: "center", paddingHorizontal: 18, paddingVertical: 12, borderRadius: 16, borderWidth: 1 },
+  addItemButtonText: { fontWeight: "900" },
+  cartBox: { marginTop: 8, borderWidth: 1, borderRadius: 16, overflow: "hidden" },
+  cartLine: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 14, gap: 10, borderBottomWidth: 1 },
   cartLineInfo: { flex: 1 },
-  cartLineTitle: { fontWeight: "900", color: "#0F172A" },
-  cartLineMeta: { color: "#64748B", marginTop: 3 },
-  cartLineTotal: { fontWeight: "900", color: "#0F172A" },
-  removeButton: { backgroundColor: "#FFF1F2", paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, borderWidth: 1, borderColor: "#FECDD3" },
-  removeButtonText: { color: "#B91C1C", fontWeight: "800" },
+  cartLineTitle: { fontWeight: "900" },
+  cartLineMeta: { marginTop: 4 },
+  cartLineTotal: { fontWeight: "900" },
+  removeButton: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, borderWidth: 1 },
+  removeButtonText: { fontWeight: "900", fontSize: 12 },
   statusRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 8 },
-  statusButton: { flexGrow: 1, alignItems: "center", paddingHorizontal: 14, paddingVertical: 11, borderRadius: 10, backgroundColor: "#F8FAFC", borderWidth: 1, borderColor: "#D8E0EA" },
+  statusButton: { flexGrow: 1, alignItems: "center", paddingHorizontal: 14, paddingVertical: 12, borderRadius: 16, borderWidth: 1 },
   statusButtonActive: { borderWidth: 2 },
-  statusButtonText: { fontWeight: "900", color: "#475569", fontSize: 12 },
-  totalBox: { marginTop: 14, backgroundColor: "#F8FAFC", padding: 14, borderRadius: 12, borderWidth: 1, borderColor: "#D8E0EA" },
-  totalRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 6, gap: 12 },
-  totalLabel: { color: "#64748B", fontWeight: "700" },
-  totalValue: { fontWeight: "900", color: "#0F172A" },
-  errorText: { color: "#DC2626", fontWeight: "700", marginTop: 8 },
-  saveButton: { marginTop: 14, backgroundColor: "#1D4ED8" },
-  listSection: { gap: 12 },
+  statusButtonText: { fontWeight: "900", fontSize: 12 },
+  totalBox: { marginTop: 16, padding: 16, borderRadius: 16, borderWidth: 1, gap: 8 },
+  totalRow: { flexDirection: "row", justifyContent: "space-between", gap: 12 },
+  totalLabel: { fontWeight: "800" },
+  totalValue: { fontWeight: "900", fontSize: 16 },
+  errorText: { fontWeight: "800", marginTop: 10, lineHeight: 19 },
+  saveButton: { marginTop: 16 },
+  listSection: { gap: 14 },
+  sectionHeader: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", gap: 12 },
   sectionTitle: { fontSize: 20, fontWeight: "900" },
-  invoiceCard: { borderColor: "#D8E0EA", borderRadius: 16 },
+  sectionCount: { fontSize: 12, fontWeight: "800" },
+  invoiceCard: { borderRadius: 22 },
   invoiceTopRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: 12 },
   invoiceInfo: { flex: 1 },
-  invoiceNo: { fontWeight: "900", color: "#0F172A", fontSize: 16 },
-  invoiceMeta: { color: "#475569", marginTop: 4, lineHeight: 19 },
-  badge: { backgroundColor: "#F1F5F9", paddingHorizontal: 10, paddingVertical: 7, borderRadius: 999, borderWidth: 1, borderColor: "#E2E8F0" },
-  badgeText: { fontWeight: "900", color: "#0F172A", textTransform: "uppercase", fontSize: 11 },
-  invoiceStatsRow: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 12 },
-  invoiceStat: { flex: 1, minWidth: 110, backgroundColor: "#F8FAFC", padding: 10, borderRadius: 10, borderWidth: 1 },
-  statLabel: { color: "#64748B", fontSize: 12, fontWeight: "700" },
-  statValue: { fontWeight: "900", color: "#0F172A", marginTop: 3 },
-  warningBox: { backgroundColor: "#FFFBEB", padding: 12, borderRadius: 8, borderWidth: 1, borderColor: "#FEF3C7" },
-  warningText: { color: "#92400E" },
+  invoiceNo: { fontWeight: "900", fontSize: 16 },
+  invoiceMeta: { marginTop: 5, lineHeight: 20 },
+  badge: { paddingHorizontal: 11, paddingVertical: 7, borderRadius: 999, borderWidth: 1 },
+  badgeText: { fontWeight: "900", textTransform: "uppercase", fontSize: 11 },
+  invoiceStatsRow: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 14, marginBottom: 14 },
+  invoiceStat: { flex: 1, minWidth: 110, padding: 12, borderRadius: 14, borderWidth: 1 },
+  statLabel: { fontSize: 12, fontWeight: "800" },
+  statValue: { fontWeight: "900", marginTop: 5, fontSize: 15 },
+  warningBox: { padding: 13, borderRadius: 14, borderWidth: 1, marginTop: 8 },
+  warningText: { fontWeight: "800", lineHeight: 19 },
 });

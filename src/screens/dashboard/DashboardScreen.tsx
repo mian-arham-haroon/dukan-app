@@ -65,9 +65,9 @@ const modules: Array<{
 ];
 
 const stats = [
-  { label: "Today Sales", value: "Rs 0", helper: "Current day" },
-  { label: "Customer Udhaar", value: "Rs 0", helper: "Outstanding" },
-  { label: "Low Stock Items", value: "0", helper: "Needs review" },
+  { label: "Today Sales", value: "Rs 0", helper: "Current day", accent: "primary" },
+  { label: "Customer Udhaar", value: "Rs 0", helper: "Outstanding", accent: "success" },
+  { label: "Low Stock Items", value: "0", helper: "Needs review", accent: "warning" },
 ];
 
 export function DashboardScreen({ navigation }: Props) {
@@ -84,9 +84,13 @@ export function DashboardScreen({ navigation }: Props) {
     <AppScreen contentStyle={styles.scrollContent}>
       <View style={styles.wrapper}>
         <AppCard style={styles.heroCard}>
-          <AppText variant="label" tone="muted">
-            Business overview
-          </AppText>
+          <View style={styles.heroTopRow}>
+            <View style={[styles.heroBadge, { backgroundColor: theme.primarySoft }]}>
+              <AppText variant="label" style={{ color: theme.primary }}>
+                Business overview
+              </AppText>
+            </View>
+          </View>
 
           <AppText variant="title" style={styles.heroTitle}>
             Dashboard
@@ -114,23 +118,33 @@ export function DashboardScreen({ navigation }: Props) {
         </AppCard>
 
         <View style={styles.statsRow}>
-          {stats.map((stat) => (
-            <AppCard
-              key={stat.label}
-              variant="muted"
-              style={[styles.statCard, { width: cardWidth }]}
-            >
-              <AppText variant="label" tone="muted">
-                {stat.label}
-              </AppText>
-              <AppText variant="title" style={styles.statValue}>
-                {stat.value}
-              </AppText>
-              <AppText variant="caption" tone="secondary">
-                {stat.helper}
-              </AppText>
-            </AppCard>
-          ))}
+          {stats.map((stat) => {
+            const accentColor =
+              stat.accent === "success"
+                ? theme.success
+                : stat.accent === "warning"
+                ? theme.warning
+                : theme.primary;
+
+            return (
+              <AppCard
+                key={stat.label}
+                variant="muted"
+                style={[styles.statCard, { width: cardWidth }]}
+              >
+                <View style={[styles.statAccent, { backgroundColor: accentColor }]} />
+                <AppText variant="label" tone="muted">
+                  {stat.label}
+                </AppText>
+                <AppText variant="title" style={styles.statValue}>
+                  {stat.value}
+                </AppText>
+                <AppText variant="caption" tone="secondary">
+                  {stat.helper}
+                </AppText>
+              </AppCard>
+            );
+          })}
         </View>
 
         <View style={styles.sectionHeader}>
@@ -163,7 +177,7 @@ export function DashboardScreen({ navigation }: Props) {
                   {
                     width: moduleWidth,
                     backgroundColor: theme.card,
-                    borderColor: theme.border,
+                    borderColor: theme.borderStrong,
                     shadowColor: theme.shadow,
                   },
                   pressed && styles.pressed,
@@ -173,9 +187,13 @@ export function DashboardScreen({ navigation }: Props) {
                   <View
                     style={[
                       styles.moduleAccent,
-                      { backgroundColor: accentColor },
+                      { backgroundColor: accentColor + "24" },
                     ]}
-                  />
+                  >
+                    <Text style={[styles.moduleInitial, { color: accentColor }]}>
+                      {item.title.charAt(0)}
+                    </Text>
+                  </View>
 
                   <View style={styles.moduleTextBox}>
                     <Text
@@ -197,7 +215,7 @@ export function DashboardScreen({ navigation }: Props) {
                   </View>
                 </View>
 
-                <Text style={[styles.moduleArrow, { color: accentColor }]}>
+                <Text style={[styles.moduleArrow, { color: theme.textSecondary }]}>
                   &gt;
                 </Text>
               </Pressable>
@@ -211,35 +229,45 @@ export function DashboardScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   scrollContent: {
-    padding: 20,
+    padding: 18,
     paddingBottom: 36,
   },
   wrapper: {
     width: "100%",
-    maxWidth: 1100,
+    maxWidth: 960,
     alignSelf: "center",
-    gap: 18,
+    gap: 16,
   },
   heroCard: {
-    padding: 24,
+    padding: 22,
+  },
+  heroTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  heroBadge: {
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
   },
   heroTitle: {
-    fontSize: 32,
-    lineHeight: 40,
-    marginTop: 6,
+    fontSize: 34,
+    lineHeight: 41,
   },
   heroSubtitle: {
-    maxWidth: 680,
-    marginTop: 6,
+    maxWidth: 620,
+    marginTop: 8,
   },
   heroActions: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 10,
-    marginTop: 20,
+    marginTop: 22,
   },
   heroButton: {
     minWidth: 170,
+    flexGrow: 1,
   },
   statsRow: {
     flexDirection: "row",
@@ -248,12 +276,19 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   statCard: {
-    minHeight: 126,
+    minHeight: 132,
     justifyContent: "space-between",
+    overflow: "hidden",
+  },
+  statAccent: {
+    width: 38,
+    height: 4,
+    borderRadius: 999,
+    marginBottom: 12,
   },
   statValue: {
-    fontSize: 28,
-    lineHeight: 36,
+    fontSize: 29,
+    lineHeight: 37,
     marginTop: 8,
   },
   sectionHeader: {
@@ -269,11 +304,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    gap: 12,
+    gap: 13,
   },
   moduleCard: {
-    minHeight: 116,
-    borderRadius: 16,
+    minHeight: 122,
+    borderRadius: 20,
     padding: 18,
     borderWidth: 1,
     flexDirection: "row",
@@ -290,13 +325,19 @@ const styles = StyleSheet.create({
   moduleContent: {
     flex: 1,
     flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
+    alignItems: "center",
+    gap: 14,
   },
   moduleAccent: {
-    width: 4,
-    alignSelf: "stretch",
-    borderRadius: 999,
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  moduleInitial: {
+    fontSize: 20,
+    fontWeight: "900",
   },
   moduleTextBox: {
     flex: 1,
