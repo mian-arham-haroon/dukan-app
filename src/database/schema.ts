@@ -194,15 +194,32 @@ export const CREATE_TABLES_SQL: string[] = [
 
   `CREATE TABLE IF NOT EXISTS sync_queue (
     id TEXT PRIMARY KEY NOT NULL,
-    table_name TEXT NOT NULL,
-    record_id TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
     operation TEXT NOT NULL,
-    payload_json TEXT NOT NULL,
+    local_id TEXT NOT NULL,
+    payload TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'pending',
-    attempts INTEGER NOT NULL DEFAULT 0,
-    last_error TEXT,
+    error_message TEXT,
+    retry_count INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+    synced_at TEXT
+  );`,
+
+  `CREATE TABLE IF NOT EXISTS daily_closes (
+    id TEXT PRIMARY KEY NOT NULL,
+    business_id TEXT NOT NULL,
+    store_id TEXT NOT NULL,
+    expected_cash REAL NOT NULL DEFAULT 0,
+    actual_cash REAL NOT NULL DEFAULT 0,
+    difference REAL NOT NULL DEFAULT 0,
+    note TEXT,
+    closed_at TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    sync_status TEXT NOT NULL DEFAULT 'pending',
+    is_deleted INTEGER NOT NULL DEFAULT 0
   );`,
 
   `CREATE INDEX IF NOT EXISTS idx_products_business_id ON products(business_id);`,

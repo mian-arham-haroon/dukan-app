@@ -12,6 +12,7 @@ import { AppButton } from "../../components/AppButton";
 import { AppCard, AppHeader, AppInput } from "../../components/ui";
 import type { RootStackParamList } from "../../navigation/RootNavigator";
 import { createBusinessWithFirstStore } from "../../services/businessCloudService";
+import { pullFullSalesDataFromCloud } from "../../services/salesCloudRestoreService";
 import { useAuthStore } from "../../store/authStore";
 import { useAppTheme } from "../../theme/useAppTheme";
 
@@ -54,6 +55,8 @@ export function BusinessSetupScreen({ navigation }: Props) {
         storeName,
         address,
       });
+
+      await pullFullSalesDataFromCloud(user);
 
       navigation.reset({
         index: 0,

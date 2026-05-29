@@ -888,6 +888,19 @@ export function SettingsScreen({ navigation }: Props) {
             <View style={styles.spacer} />
 
             <AppButton
+              title={
+                syncing
+                  ? "Restoring full cloud data..."
+                  : "Restore from Cloud"
+              }
+              variant="secondary"
+              onPress={handlePullFullSalesDataFromCloud}
+              disabled={isActionBusy}
+            />
+
+            <View style={styles.spacer} />
+
+            <AppButton
               title={signingOut ? "Logging out..." : "Logout"}
               variant="secondary"
               onPress={handleLogout}

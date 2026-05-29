@@ -14,11 +14,13 @@ type SyncStatus = "pending" | "synced" | "failed";
 export type SyncQueueItem = {
   id: string;
   entity_type: SyncEntityType;
+  entity_id: string;
   operation: SyncOperation;
   local_id: string;
   payload: string;
   status: SyncStatus;
   error_message: string | null;
+  retry_count: number;
   created_at: string;
   updated_at: string;
   synced_at: string | null;
@@ -97,11 +99,13 @@ async function ensureSyncQueueTable() {
     CREATE TABLE IF NOT EXISTS sync_queue (
       id TEXT PRIMARY KEY NOT NULL,
       entity_type TEXT NOT NULL,
+      entity_id TEXT NOT NULL,
       operation TEXT NOT NULL,
       local_id TEXT NOT NULL,
       payload TEXT NOT NULL,
       status TEXT NOT NULL DEFAULT 'pending',
       error_message TEXT,
+      retry_count INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       synced_at TEXT
@@ -252,11 +256,13 @@ async function addToSyncQueue(
   const item: SyncQueueItem = {
     id: generateId("sync"),
     entity_type: entityType,
+    entity_id: localId,
     operation,
     local_id: localId,
     payload: JSON.stringify(payload),
     status: "pending",
     error_message: null,
+    retry_count: 0,
     created_at: nowIso(),
     updated_at: nowIso(),
     synced_at: null,
@@ -269,7 +275,7 @@ async function addToSyncQueue(
       (queueItem) =>
         !(
           queueItem.entity_type === entityType &&
-          queueItem.local_id === localId &&
+          (queueItem.local_id === localId || queueItem.entity_id === localId) &&
           queueItem.status !== "synced"
         )
     );
@@ -286,10 +292,10 @@ async function addToSyncQueue(
     `
       DELETE FROM sync_queue
       WHERE entity_type = ?
-        AND local_id = ?
+        AND (local_id = ? OR entity_id = ?)
         AND status != 'synced';
     `,
-    [entityType, localId]
+    [entityType, localId, localId]
   );
 
   await db.runAsync(
@@ -297,25 +303,29 @@ async function addToSyncQueue(
       INSERT INTO sync_queue (
         id,
         entity_type,
+        entity_id,
         operation,
         local_id,
         payload,
         status,
         error_message,
+        retry_count,
         created_at,
         updated_at,
         synced_at
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     `,
     [
       item.id,
       item.entity_type,
+      item.entity_id,
       item.operation,
       item.local_id,
       item.payload,
       item.status,
       item.error_message,
+      item.retry_count,
       item.created_at,
       item.updated_at,
       item.synced_at,
@@ -540,6 +550,7 @@ async function markQueueItemFailed(id: string, errorMessage: string) {
             ...item,
             status: "failed" as SyncStatus,
             error_message: errorMessage,
+            retry_count: Number(item.retry_count ?? 0) + 1,
             updated_at: nowIso(),
           }
         : item
@@ -556,6 +567,7 @@ async function markQueueItemFailed(id: string, errorMessage: string) {
       UPDATE sync_queue
       SET status = 'failed',
           error_message = ?,
+          retry_count = COALESCE(retry_count, 0) + 1,
           updated_at = ?
       WHERE id = ?;
     `,
@@ -569,6 +581,7 @@ async function syncOneQueueItem(
   storeId: string
 ) {
   const payload = JSON.parse(item.payload || "{}");
+  const entityId = item.local_id || item.entity_id;
 
   if (item.entity_type === "product") {
     if (item.operation === "delete") {
@@ -579,7 +592,7 @@ async function syncOneQueueItem(
           updated_at: nowIso(),
         })
         .eq("business_id", businessId)
-        .eq("local_id", item.local_id);
+        .eq("local_id", entityId);
 
       if (result.error) {
         throw new Error(result.error.message);
@@ -592,7 +605,7 @@ async function syncOneQueueItem(
       {
         business_id: businessId,
         store_id: storeId,
-        local_id: item.local_id,
+        local_id: entityId,
         name: payload.name,
         sku: payload.sku,
         unit: payload.unit ?? "pcs",
@@ -623,7 +636,7 @@ async function syncOneQueueItem(
           updated_at: nowIso(),
         })
         .eq("business_id", businessId)
-        .eq("local_id", item.local_id);
+        .eq("local_id", entityId);
 
       if (result.error) {
         throw new Error(result.error.message);
@@ -635,7 +648,7 @@ async function syncOneQueueItem(
     const result = await supabase.from("customers").upsert(
       {
         business_id: businessId,
-        local_id: item.local_id,
+        local_id: entityId,
         name: payload.name,
         phone: payload.phone,
         address: payload.address,

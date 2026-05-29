@@ -13,6 +13,7 @@ import { AppButton } from "../../components/AppButton";
 import { AppCard, AppHeader, AppInput } from "../../components/ui";
 import type { RootStackParamList } from "../../navigation/RootNavigator";
 import { getUserBusinessContext } from "../../services/businessCloudService";
+import { pullFullSalesDataFromCloud } from "../../services/salesCloudRestoreService";
 import { isSupabaseConfigured, supabase } from "../../services/supabase";
 import { useAuthStore } from "../../store/authStore";
 import { useAppTheme } from "../../theme/useAppTheme";
@@ -35,6 +36,10 @@ export function LoginScreen({ navigation }: Props) {
     setSession(session);
 
     const context = await getUserBusinessContext(session.user);
+
+    if (context.business) {
+      await pullFullSalesDataFromCloud(session.user);
+    }
 
     navigation.reset({
       index: 0,
