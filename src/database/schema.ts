@@ -25,6 +25,7 @@ export const CREATE_TABLES_SQL: string[] = [
   `CREATE TABLE IF NOT EXISTS products (
     id TEXT PRIMARY KEY NOT NULL,
     business_id TEXT NOT NULL,
+    store_id TEXT NOT NULL DEFAULT 'local-store-001',
     name TEXT NOT NULL,
     sku TEXT,
     barcode TEXT,
@@ -34,6 +35,7 @@ export const CREATE_TABLES_SQL: string[] = [
     selling_price REAL NOT NULL DEFAULT 0,
     stock_quantity INTEGER NOT NULL DEFAULT 0,
     low_stock_threshold INTEGER NOT NULL DEFAULT 5,
+    low_stock_alert INTEGER NOT NULL DEFAULT 5,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now')),
     sync_status TEXT NOT NULL DEFAULT 'pending',
