@@ -1,0 +1,40 @@
+<svg width="1280" height="760" viewBox="0 0 1280 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="760" rx="32" fill="#F1F5F9"/>
+  <text x="70" y="78" font-family="Arial" font-size="42" font-weight="900" fill="#0F172A">App Screens</text>
+  <text x="70" y="120" font-family="Arial" font-size="22" fill="#475569">Replace these mockups with real screenshots from your final APK/demo.</text>
+  <defs><filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="16" stdDeviation="14" flood-opacity="0.18"/></filter></defs>
+  <g filter="url(#sh)" font-family="Arial">
+    <g transform="translate(90 170)">
+      <rect width="235" height="470" rx="32" fill="#0F172A"/>
+      <rect x="16" y="38" width="203" height="390" rx="18" fill="#FFFFFF"/>
+      <text x="38" y="85" font-size="21" font-weight="800" fill="#0F172A">Dashboard</text>
+      <rect x="38" y="115" width="160" height="58" rx="14" fill="#E0F2FE"/>
+      <rect x="38" y="193" width="160" height="58" rx="14" fill="#DCFCE7"/>
+      <rect x="38" y="271" width="160" height="58" rx="14" fill="#FEF3C7"/>
+    </g>
+    <g transform="translate(382 170)">
+      <rect width="235" height="470" rx="32" fill="#0F172A"/>
+      <rect x="16" y="38" width="203" height="390" rx="18" fill="#FFFFFF"/>
+      <text x="38" y="85" font-size="21" font-weight="800" fill="#0F172A">Invoices</text>
+      <rect x="38" y="122" width="160" height="46" rx="12" fill="#E0F2FE"/>
+      <rect x="38" y="188" width="160" height="46" rx="12" fill="#E0F2FE"/>
+      <rect x="38" y="254" width="160" height="46" rx="12" fill="#E0F2FE"/>
+    </g>
+    <g transform="translate(674 170)">
+      <rect width="235" height="470" rx="32" fill="#0F172A"/>
+      <rect x="16" y="38" width="203" height="390" rx="18" fill="#FFFFFF"/>
+      <text x="38" y="85" font-size="21" font-weight="800" fill="#0F172A">Reports</text>
+      <rect x="38" y="122" width="160" height="52" rx="12" fill="#DCFCE7"/>
+      <rect x="38" y="194" width="160" height="52" rx="12" fill="#FEF3C7"/>
+      <rect x="38" y="266" width="160" height="52" rx="12" fill="#FFE4E6"/>
+    </g>
+    <g transform="translate(966 170)">
+      <rect width="235" height="470" rx="32" fill="#0F172A"/>
+      <rect x="16" y="38" width="203" height="390" rx="18" fill="#FFFFFF"/>
+      <text x="38" y="85" font-size="21" font-weight="800" fill="#0F172A">Settings</text>
+      <rect x="38" y="122" width="160" height="52" rx="12" fill="#E0E7FF"/>
+      <rect x="38" y="194" width="160" height="52" rx="12" fill="#DCFCE7"/>
+      <rect x="38" y="266" width="160" height="52" rx="12" fill="#FEE2E2"/>
+    </g>
+  </g>
+</svg>
