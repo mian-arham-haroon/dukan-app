@@ -494,8 +494,8 @@ This project can be presented as a practical business solution for small shops t
 ## Author
 
 **Arham**  
-Student & CTO  
-Final Year Project — Mobile Application Development
+Student & freelancer  
+Final semester Project — Mobile Application Development
 
 ---
 
